@@ -482,7 +482,7 @@
               <div class="field"><label>Э.П.О.С. Дар</label><input type="text" id="ag_gift"></div>
             </div>
             <div class="row2">
-              <div class="field"><label>Департамент</label><input type="text" id="ag_dept"></div>
+              <div class="field"><label>Департамент</label><select id="ag_dept"><option value="">— выбрать —</option></select></div>
               <div class="field"><label>Должность</label><input type="text" id="ag_pos"></div>
             </div>
           </div>
@@ -587,7 +587,7 @@
                 <select id="an_studyLvl"><option value="1">I</option><option value="2">II</option><option value="3">III</option><option value="4">IV</option><option value="5">V</option></select>
               </div>
               <div class="field"><label>PE-ячеек сейчас</label><input type="number" id="an_curpe" value="0"></div>
-              <div class="field"><label>Местонахождение</label><input type="text" id="an_loc"></div>
+              <div class="field"><label>Местонахождение</label><select id="an_loc"><option value="">— выбрать —</option></select></div>
             </div>
           </div>
 
@@ -1788,6 +1788,23 @@
     return out;
   }
 
+  async function listDepartments(){
+    const all = await listAllAccounts();
+    const depts = all.filter(a=>a.type==='sephirah' && a.deptName && a.deptName.trim()).map(a=>a.deptName.trim());
+    return Array.from(new Set(depts));
+  }
+
+  async function fillDeptSelect(selectId, currentValue){
+    const sel = document.getElementById(selectId);
+    if(!sel) return;
+    const depts = await listDepartments();
+    if(currentValue && !depts.includes(currentValue)) depts.push(currentValue);
+    sel.innerHTML = '<option value="">— выбрать —</option>' + depts.map(d=>`<option value="${d}" ${d===currentValue?'selected':''}>${d}</option>`).join('');
+    if(!depts.length){
+      sel.innerHTML = '<option value="">— пока нет департаментов, дождитесь регистрации Сефиры —</option>';
+    }
+  }
+
   async function seedDefaults(){
     const existing = await getAccountRaw('test_sephirah');
     if(!existing){
@@ -2037,6 +2054,7 @@
   function initAgentForm(){
     if(agentFormInited) return;
     agentFormInited = true;
+    fillDeptSelect('ag_dept');
     const updateStats = wireAgentStatSteppers('ag_statRow', 'ag_pointCounter', 'ag_levelOut', 'ag_maxhp', 'ag_maxsp', 'ag_speed');
     addTraitCard('ag_traits');
     document.getElementById('ag_addTrait').addEventListener('click', ()=>addTraitCard('ag_traits'));
@@ -2168,6 +2186,7 @@
   function initAnomalyForm(){
     if(anomalyFormInited) return;
     anomalyFormInited = true;
+    fillDeptSelect('an_loc');
     fillSelectWithDesc('an_letter', ANOMALY_LETTERS, 'an_letterDesc');
     fillSelectWithDesc('an_class', ANOMALY_CLASSES, 'an_classDesc');
     const riskSel = document.getElementById('an_risk');
@@ -2479,7 +2498,7 @@
         <div class="field"><label>Броня</label>${equipCard(acc.armorItem, acc.armor, 'Броня')}</div>
         <div class="field"><label>Дары</label>${giftsHtml}</div>
         <div class="row2" style="margin-top:10px;">
-          <div class="field"><label>Департамент</label><input type="text" id="dos_ag_dept" value="${acc.dept||''}"></div>
+          <div class="field"><label>Департамент</label><select id="dos_ag_dept"></select></div>
           <div class="field"><label>Должность</label><input type="text" id="dos_ag_pos" value="${acc.pos||''}"></div>
         </div>
         <div class="field"><label>Бонус департамента (к характеристикам)</label></div>
@@ -2664,6 +2683,7 @@
       }
       document.getElementById('dos_ag_addTrait').addEventListener('click', ()=>addTraitCard('dos_ag_traits', null));
 
+      fillDeptSelect('dos_ag_dept', acc.dept);
       document.querySelectorAll('#dos_ag_equip_sec_edit [data-deptk]').forEach(st=>wireStepper(st));
 
       // live level calc from the 4 editable bonus fields (dept/gifts/traits/total) per stat
@@ -2823,7 +2843,7 @@
     const s = item.stats||{};
     if(item.type==='weapon'){
       return 'Ур. '+(s.risk||'ZAYIN')+' · '+(ATK_SPEED_LABEL[s.atkSpeed]||'')+' · дальность: '+(RANGE_LABEL[s.range]||'—')+
-        '<br>Урон: '+(s.dmgVal||0)+' '+(s.dmgType||'RED')+
+        '<br>Урон: '+(s.dmgMin||0)+'-'+(s.dmgMax||0)+' '+(s.dmgType||'RED')+
         (s.req?('<br>Требования: '+s.req):'');
     }
     if(item.type==='armor'){
@@ -3047,9 +3067,12 @@
     if(type==='weapon'){
       wrap.innerHTML = `
         <div class="field"><label>Уровень Э.П.О.С.</label><select id="an_ego_risk">${RISK_LEVELS_SHORT.map(r=>`<option value="${r}">${r}</option>`).join('')}</select></div>
-        <div class="field"><label>Урон по попаданию</label>
+        <div class="field"><label>Урон по попаданию (Мин-Макс)</label>
           <div class="row2">
-            <input type="number" id="an_ego_dmgVal" value="0">
+            <div class="row2" style="gap:6px;">
+              <input type="number" id="an_ego_dmgMin" value="0" placeholder="Мин">
+              <input type="number" id="an_ego_dmgMax" value="0" placeholder="Макс">
+            </div>
             <div class="dmg-type-row" id="an_ego_dmgTypeRow">
               <div class="dmg-btn sel" data-t="RED" title="Красный — снижает HP"><svg class="ic"><use href="#ic-red"/></svg></div>
               <div class="dmg-btn" data-t="WHITE" title="Белый — снижает SP"><svg class="ic"><use href="#ic-white"/></svg></div>
@@ -3136,7 +3159,8 @@
       stats = {
         risk: document.getElementById('an_ego_risk').value,
         dmgType: selBtn ? selBtn.dataset.t : 'RED',
-        dmgVal: parseFloat(document.getElementById('an_ego_dmgVal').value)||0,
+        dmgMin: parseFloat(document.getElementById('an_ego_dmgMin').value)||0,
+        dmgMax: parseFloat(document.getElementById('an_ego_dmgMax').value)||0,
         atkSpeed: document.getElementById('an_ego_atkSpeed').value,
         range: document.getElementById('an_ego_range').value,
         req: document.getElementById('an_ego_req').value,
