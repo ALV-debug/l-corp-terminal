@@ -2457,19 +2457,27 @@
     const deptB = acc.deptBonus || {};
     const deptBonusStr = Object.keys(STAT_LABELS).filter(k=>deptB[k]).map(k=>STAT_LABELS[k]+': '+signed(deptB[k])).join(' · ') || 'нет бонусов';
 
+    function equipCard(itemObj, fallbackText, label){
+      if(itemObj){
+        return `<div class="trait-card"><b>${itemObj.name}</b> <span class="reg-badge active" style="margin-left:6px;">${ARSENAL_TYPE_LABEL[itemObj.type]}</span>
+          ${itemObj.desc?`<div class="hint" style="margin:4px 0;">${itemObj.desc}</div>`:''}
+          <div style="font-size:10.5px;color:var(--amber);">${arsenalItemSummary(itemObj)}</div>
+          ${itemObj.sourceAnomalyName?`<div class="hint" style="margin-top:4px;">Источник: «${itemObj.sourceAnomalyName}» (Арсенал)</div>`:''}
+        </div>`;
+      }
+      return fallbackText ? `<div style="font-size:12.5px;padding:6px 0;color:var(--bone);">${fallbackText}</div>` : `<div class="hint">Не экипировано.</div>`;
+    }
     const equipReadInner = `
-        <div class="row2">${fld('Оружие', acc.weapon)}${fld('Броня', acc.armor)}</div>
+        <div class="field"><label>Оружие</label>${equipCard(acc.weaponItem, acc.weapon, 'Оружие')}</div>
+        <div class="field"><label>Броня</label>${equipCard(acc.armorItem, acc.armor, 'Броня')}</div>
         <div class="field"><label>Дары</label>${giftsHtml}</div>
         <div class="row2">${fld('Департамент', acc.dept)}${fld('Должность', acc.pos)}</div>
         ${fld('Бонус департамента', deptBonusStr)}`;
     const equipEditInner = `
-        <div class="row2">
-          <div class="field"><label>Оружие</label><input type="text" id="dos_ag_weapon" value="${acc.weapon||''}"></div>
-          <div class="field"><label>Броня</label><input type="text" id="dos_ag_armor" value="${acc.armor||''}"></div>
-        </div>
-        <div class="field"><label>Дары</label></div>
-        <div id="dos_ag_gifts"></div>
-        <button class="runbtn ghost" id="dos_ag_addGift">+ Добавить дар</button>
+        <div class="hint">Оружие, Броня и Дары выдаются только через запрос в Арсенале с одобрения Сефиры — редактировать их вручную здесь нельзя.</div>
+        <div class="field"><label>Оружие</label>${equipCard(acc.weaponItem, acc.weapon, 'Оружие')}</div>
+        <div class="field"><label>Броня</label>${equipCard(acc.armorItem, acc.armor, 'Броня')}</div>
+        <div class="field"><label>Дары</label>${giftsHtml}</div>
         <div class="row2" style="margin-top:10px;">
           <div class="field"><label>Департамент</label><input type="text" id="dos_ag_dept" value="${acc.dept||''}"></div>
           <div class="field"><label>Должность</label><input type="text" id="dos_ag_pos" value="${acc.pos||''}"></div>
@@ -2482,6 +2490,13 @@
     const equipBlock = isOwner
       ? ownerCard('Экипировка и служба', 'dos_ag_equip_sec', equipReadInner, equipEditInner)
       : `<div class="form-card"><div class="ftitle">Экипировка и служба</div>${equipReadInner}</div>`;
+
+    const resonancesHtml = (acc.resonances||[]).map(r=>
+      `<div class="trait-card"><b>${r.name}</b> <span class="hint">(ранг ${r.tier||'—'}, от «${r.sourceAnomalyName||'?'}»)</span>
+        ${r.desc?`<div class="hint" style="margin-top:4px;">${r.desc}</div>`:''}
+      </div>`
+    ).join('') || '<div class="hint">Резонансы не получены — выдаются автоматически при полной экипировке комплекта одной аномалии.</div>';
+    const resonancesBlock = `<div class="form-card"><div class="ftitle">Полученные Резонансы</div>${resonancesHtml}</div>`;
 
     return `
       <div class="form-card">
@@ -2497,6 +2512,7 @@
       ${traitsBlock}
       ${talentsBlock}
       ${equipBlock}
+      ${resonancesBlock}
     `;
   }
 
@@ -2648,10 +2664,6 @@
       }
       document.getElementById('dos_ag_addTrait').addEventListener('click', ()=>addTraitCard('dos_ag_traits', null));
 
-      // gifts editor, prefilled (with migration from legacy single `gift` string)
-      const existingGiftsInit = acc.gifts || (acc.gift ? [{name: acc.gift, desc:'', hp:0, sp:0, speed:0, work:0}] : []);
-      existingGiftsInit.forEach(g=>addGiftCard('dos_ag_gifts', g));
-      document.getElementById('dos_ag_addGift').addEventListener('click', ()=>addGiftCard('dos_ag_gifts', null));
       document.querySelectorAll('#dos_ag_equip_sec_edit [data-deptk]').forEach(st=>wireStepper(st));
 
       // live level calc from the 4 editable bonus fields (dept/gifts/traits/total) per stat
@@ -2744,16 +2756,6 @@
       });
 
       document.getElementById('dos_ag_saveEquip').addEventListener('click', async ()=>{
-        acc.weapon = document.getElementById('dos_ag_weapon').value;
-        acc.armor = document.getElementById('dos_ag_armor').value;
-        const gifts = [];
-        document.querySelectorAll('#dos_ag_gifts .trait-card').forEach(card=>{
-          const g = {name: card.querySelector('.giftName').value, desc: card.querySelector('.giftDesc').value};
-          card.querySelectorAll('.stepper').forEach(st=>{ g[st.dataset.k] = parseInt(st.querySelector('input').value)||0; });
-          gifts.push(g);
-        });
-        acc.gifts = gifts;
-        delete acc.gift;
         acc.dept = document.getElementById('dos_ag_dept').value;
         acc.pos = document.getElementById('dos_ag_pos').value;
         const deptBonus = {};
@@ -2762,7 +2764,7 @@
         });
         acc.deptBonus = deptBonus;
         await saveAccount(acc);
-        logEvent('Агент «'+(acc.name||acc.login)+'» изменил экипировку/службу.');
+        logEvent('Агент «'+(acc.name||acc.login)+'» изменил Департамент/Должность.');
         renderDossier(acc);
       });
     }
@@ -2940,18 +2942,55 @@
 
   function applyEquipEffect(acc, item){
     const s = item.stats||{};
+    // Храним полную копию предмета (без служебных полей управления копиями/запросами) —
+    // чтобы в Досье агента показывалась та же карточка, что и в Арсенале, но без прав редактирования.
+    const itemCopy = { id:item.id, type:item.type, name:item.name, desc:item.desc||'', stats:s, sourceAnomalyName: item.sourceAnomalyName };
     if(item.type==='weapon'){
-      acc.weapon = item.name+' [риск '+(s.risk||'ZAYIN')+', '+(ATK_SPEED_LABEL[s.atkSpeed]||'')+', дальность '+(RANGE_LABEL[s.range]||'—')+'] — '+(s.dmgVal||0)+' '+(s.dmgType||'RED');
+      acc.weaponItem = itemCopy;
+      acc.weaponSourceAnomalyId = item.sourceAnomalyId;
     } else if(item.type==='armor'){
-      const resTxt = Object.keys(s.res||{}).filter(c=>s.res[c]).map(c=>COLOR_LABEL[c]+' '+s.res[c]).join(', ') || 'без сопротивлений';
-      acc.armor = item.name+' [риск '+(s.risk||'ZAYIN')+'] — '+resTxt;
+      acc.armorItem = itemCopy;
+      acc.armorSourceAnomalyId = item.sourceAnomalyId;
     } else if(item.type==='gift'){
       acc.gifts = acc.gifts || [];
       acc.gifts.push({
         name:item.name, desc:item.desc||'',
         courage:s.courage||0, wisdom:s.wisdom||0, endurance:s.endurance||0, justice:s.justice||0,
-        hp:s.hp||0, sp:s.sp||0, work:0
+        hp:s.hp||0, sp:s.sp||0, work:0,
+        sourceAnomalyId: item.sourceAnomalyId, sourceAnomalyName: item.sourceAnomalyName
       });
+    }
+  }
+
+  // Проверяет: экипированы ли у агента ВСЕ типы снаряжения (из тех, что вообще существуют у этой аномалии)
+  // именно от данной аномалии — если да, и у аномалии есть предмет-Резонанс, выдаёт его автоматически.
+  async function checkAndGrantResonance(acc, anomalyId){
+    const all = await listArsenal();
+    const anomalyItems = all.filter(i=>i.sourceAnomalyId===anomalyId);
+    const resonanceItem = anomalyItems.find(i=>i.type==='resonance');
+    if(!resonanceItem) return;
+
+    const hasWeaponType = anomalyItems.some(i=>i.type==='weapon');
+    const hasArmorType = anomalyItems.some(i=>i.type==='armor');
+    const hasGiftType = anomalyItems.some(i=>i.type==='gift');
+
+    const agentHasWeapon = !hasWeaponType || acc.weaponSourceAnomalyId === anomalyId;
+    const agentHasArmor = !hasArmorType || acc.armorSourceAnomalyId === anomalyId;
+    const agentHasGift = !hasGiftType || (acc.gifts||[]).some(g=>g.sourceAnomalyId===anomalyId);
+
+    if(agentHasWeapon && agentHasArmor && agentHasGift){
+      acc.resonances = acc.resonances || [];
+      const already = acc.resonances.some(r=>r.itemId===resonanceItem.id);
+      if(!already){
+        acc.resonances.push({
+          itemId: resonanceItem.id, name: resonanceItem.name,
+          tier: (resonanceItem.stats||{}).tier, desc: resonanceItem.desc||'',
+          sourceAnomalyId: anomalyId, sourceAnomalyName: resonanceItem.sourceAnomalyName,
+          grantedAt: Date.now()
+        });
+        await saveAccount(acc);
+        logEvent('Агенту «'+(acc.name||acc.login)+'» автоматически выдан Резонанс «'+resonanceItem.name+'» — полный комплект от «'+resonanceItem.sourceAnomalyName+'».');
+      }
     }
   }
 
@@ -2967,6 +3006,7 @@
     }
     applyEquipEffect(agentAcc, item);
     await saveAccount(agentAcc);
+    await checkAndGrantResonance(agentAcc, item.sourceAnomalyId);
     item.pendingRequests = (item.pendingRequests||[]).filter(r=>r.agentId!==agentId);
     item.equippedBy = item.equippedBy || [];
     item.equippedBy.push({agentId, agentName: req.agentName, equippedAt: Date.now()});
@@ -3161,8 +3201,19 @@
           <input type="number" class="editMaxCopies" data-id="${item.id}" value="${item.maxCopies}" min="0" style="width:70px;">
           <button class="runbtn ghost saveMaxCopiesBtn" data-id="${item.id}" style="margin-top:0;padding:6px 10px;font-size:9.5px;">Изменить макс. копий →</button>
         </div>`:''}
+        <button class="runbtn ghost delMyArsenalBtn" data-id="${item.id}" style="margin-top:8px;border-color:var(--red);color:#f2b3ac;">Удалить из Арсенала</button>
       </div>`;
     }).join('') : '<div class="hint">Пока ничего не создано.</div>';
+    wrap.querySelectorAll('.delMyArsenalBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const item = mine.find(i=>i.id===btn.dataset.id);
+        if(!confirm('Удалить «'+(item?item.name:'предмет')+'» из Арсенала безвозвратно?')) return;
+        await deleteArsenalItem(btn.dataset.id);
+        logEvent('Аномалия «'+(acc.name||acc.id)+'» удалила «'+(item?item.name:'предмет')+'» из Арсенала.', true);
+        populateMyArsenal(acc);
+        renderArsenalList();
+      });
+    });
     wrap.querySelectorAll('.saveMaxCopiesBtn').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         const item = mine.find(i=>i.id===btn.dataset.id);
