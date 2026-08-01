@@ -310,6 +310,25 @@
     padding:4px 8px; border-radius:3px; cursor:pointer; font-family:'IBM Plex Mono', monospace; }
   .logoutbtn:hover{ color:#f2b3ac; border-color:var(--red); }
 
+  /* ===== MODE SELECT (title screen) ===== */
+  .mode-select{ padding: 46px 24px 54px; text-align:center; }
+  .mode-select-title{ font-family:'Cinzel',serif; font-size:20px; letter-spacing:4px; color:var(--bone);
+    text-transform:uppercase; margin-bottom:6px; }
+  .mode-select-sub{ font-size:10.5px; color:var(--muted); letter-spacing:1px; margin-bottom:36px; }
+  .mode-cards{ display:grid; grid-template-columns:1fr 1fr; gap:22px; max-width:520px; margin:0 auto; }
+  @media (max-width:560px){ .mode-cards{ grid-template-columns:1fr; } }
+  .mode-card{ background: linear-gradient(180deg, var(--panel), #100e0a); border:1px solid var(--line);
+    border-radius:8px; padding:34px 18px; cursor:pointer; display:flex; flex-direction:column; align-items:center;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; font-family:'IBM Plex Mono', monospace; }
+  .mode-card:hover{ transform: translateY(-4px); border-color:var(--amber-dim);
+    box-shadow: 0 14px 30px -14px rgba(217,154,63,.4); }
+  .mode-card-icon{ width:44px; height:44px; color:var(--amber); margin-bottom:16px; opacity:.9; }
+  .mode-card-title{ font-family:'Cinzel',serif; font-size:15px; letter-spacing:2.5px; color:var(--bone);
+    text-transform:uppercase; margin-bottom:8px; }
+  .mode-card-sub{ font-size:10px; color:var(--muted); letter-spacing:.5px; }
+  .mode-card.disabled{ opacity:.35; cursor:not-allowed; }
+  .mode-card.disabled:hover{ transform:none; border-color:var(--line); box-shadow:none; }
+
   @media (prefers-reduced-motion: reduce){
     .boot, .splash, .splash img, .splash h1, .splash .fac, .splash .enter, .big-number, #sysLog .row, .flicker, .dot, .powerline{ animation:none !important; transition:none !important; }
   }
@@ -345,6 +364,8 @@
   <symbol id="ic-tab-res" viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11L10 22l9-12h-6.5Z" fill="currentColor"/></symbol>
   <symbol id="ic-tab-agro" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
   <symbol id="ic-tab-work" viewBox="0 0 24 24"><path d="M12 8.3a3.7 3.7 0 1 0 0 7.4 3.7 3.7 0 0 0 0-7.4Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2.6M12 18.9v2.6M21.5 12h-2.6M5.1 12H2.5M18.4 5.6l-1.9 1.9M7.5 16.5l-1.9 1.9M18.4 18.4l-1.9-1.9M7.5 7.5 5.6 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="ic-tab-arsenal" viewBox="0 0 24 24"><path d="M12 2 4 5.5v5.5c0 5.2 3.4 8.6 8 10.5 4.6-1.9 8-5.3 8-10.5V5.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.7 12l2.2 2.2 4.4-4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-mode-profile" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9.5" cy="10.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 16.5c.6-2 2.1-3.1 3.7-3.1s3.1 1.1 3.7 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15 9h4M15 12.3h4M15 15.6h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
 </defs>
 </svg>
 
@@ -424,21 +445,20 @@
 
           <div class="form-card">
             <div class="ftitle">II. Характеристики</div>
-            <div class="field"><label>Уровень агента</label>
-              <select id="ag_level"><option value="1">I</option><option value="2">II</option><option value="3">III</option><option value="4">IV</option><option value="5">V</option></select>
-            </div>
-            <div class="hint">Распределите ровно 60 очков. Порог характеристики: 10–20.</div>
+            <div class="hint">Значения характеристик — от 0 до 100. Уровень характеристики и итоговый Уровень агента считаются автоматически.</div>
+            <div class="hint">Распределите ровно 60 очков между характеристиками. Порог каждой: 10–20 (стартовые значения агента).</div>
             <div class="stepper-row" id="ag_statRow">
-              <div><div class="stepper" data-stat="courage"><button class="dn">−</button><input type="number" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Мужество</div></div>
-              <div><div class="stepper" data-stat="wisdom"><button class="dn">−</button><input type="number" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Мудрость</div></div>
-              <div><div class="stepper" data-stat="endurance"><button class="dn">−</button><input type="number" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Выдержка</div></div>
-              <div><div class="stepper" data-stat="justice"><button class="dn">−</button><input type="number" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Справедливость</div></div>
+              <div><div class="stepper" data-stat="courage"><button class="dn">−</button><input type="number" class="statInput" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Мужество</div></div>
+              <div><div class="stepper" data-stat="wisdom"><button class="dn">−</button><input type="number" class="statInput" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Мудрость</div></div>
+              <div><div class="stepper" data-stat="endurance"><button class="dn">−</button><input type="number" class="statInput" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Выдержка</div></div>
+              <div><div class="stepper" data-stat="justice"><button class="dn">−</button><input type="number" class="statInput" value="15" min="10" max="20"><button class="up">+</button></div><div class="stepper-label">Справедливость</div></div>
             </div>
             <div class="point-counter" id="ag_pointCounter">Остаток очков: 0/60</div>
+            <div class="point-counter ok" id="ag_levelOut">Уровень агента: I</div>
             <div class="row3" style="margin-top:10px;">
-              <div class="field"><label>Макс. HP</label><input type="number" id="ag_maxhp" value="100"></div>
-              <div class="field"><label>Макс. SP</label><input type="number" id="ag_maxsp" value="100"></div>
-              <div class="field"><label>Скорость</label><input type="number" id="ag_speed" value="30"></div>
+              <div class="field"><label>Макс. HP (= Мужество)</label><input type="number" id="ag_maxhp" value="15" disabled></div>
+              <div class="field"><label>Макс. SP (= Мудрость)</label><input type="number" id="ag_maxsp" value="15" disabled></div>
+              <div class="field"><label>Скорость (= Справедливость)</label><input type="number" id="ag_speed" value="15" disabled></div>
             </div>
           </div>
 
@@ -631,19 +651,39 @@
       <span class="bars"><i></i><i></i><i></i><i></i></span>
       <span class="batt"><span class="cell"><span class="fill"></span></span>78%</span>
       <span class="who-badge" id="whoBadge" style="display:none;"></span>
+      <button class="logoutbtn" id="backToModesBtn" style="display:none;">⌂ Режимы</button>
       <button class="logoutbtn" id="logoutBtn" style="display:none;">Выход</button>
       <button class="soundbtn" id="soundToggle">♪ ЗВУК: ВКЛ</button>
     </div>
   </div>
 
-  <nav class="tabs">
-    <button class="active" data-tab="dmg" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-dmg"/></svg>Урон</button>
-    <button data-tab="resonance" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-res"/></svg>Резонанс</button>
-    <button data-tab="aggro" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-agro"/></svg>Агро</button>
-    <button data-tab="ebox" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-work"/></svg>Работа</button>
-    <button data-tab="dossier" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-agro"/></svg>Досье</button>
-    <button data-tab="registry" data-roles="sephirah"><svg class="ic"><use href="#ic-tab-res"/></svg>Реестр</button>
-    <button data-tab="logs" data-roles="sephirah"><svg class="ic"><use href="#ic-tab-dmg"/></svg>Журналы</button>
+  <!-- ============ MODE SELECT (title screen) ============ -->
+  <div class="mode-select" id="modeSelect" style="display:none;">
+    <div class="mode-select-title">Выбор режима</div>
+    <div class="mode-select-sub">Комплекс «STARFALL» // выберите раздел терминала</div>
+    <div class="mode-cards">
+      <button class="mode-card" data-mode="profile">
+        <svg class="mode-card-icon"><use href="#ic-mode-profile"/></svg>
+        <div class="mode-card-title">Профиль</div>
+        <div class="mode-card-sub">Досье, документы, арсенал</div>
+      </button>
+      <button class="mode-card" data-mode="combat" id="modeCombatCard">
+        <svg class="mode-card-icon"><use href="#ic-tab-dmg"/></svg>
+        <div class="mode-card-title">Боевой режим</div>
+        <div class="mode-card-sub">Урон, резонанс, агро</div>
+      </button>
+    </div>
+  </div>
+
+  <nav class="tabs" id="navTabs" style="display:none;">
+    <button class="active" data-tab="dmg" data-mode="combat" data-roles="agent,anomaly"><svg class="ic"><use href="#ic-tab-dmg"/></svg>Урон</button>
+    <button data-tab="resonance" data-mode="combat" data-roles="agent"><svg class="ic"><use href="#ic-tab-res"/></svg>Резонанс</button>
+    <button data-tab="aggro" data-mode="combat" data-roles="agent,anomaly"><svg class="ic"><use href="#ic-tab-agro"/></svg>Агро</button>
+    <button data-tab="ebox" data-mode="profile" data-roles="anomaly"><svg class="ic"><use href="#ic-tab-work"/></svg>Работа</button>
+    <button data-tab="dossier" data-mode="profile" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-agro"/></svg>Досье</button>
+    <button data-tab="arsenal" data-mode="profile" data-roles="sephirah,agent,anomaly"><svg class="ic"><use href="#ic-tab-arsenal"/></svg>Арсенал</button>
+    <button data-tab="registry" data-mode="profile" data-roles="sephirah"><svg class="ic"><use href="#ic-tab-res"/></svg>Реестр</button>
+    <button data-tab="logs" data-mode="profile" data-roles="sephirah"><svg class="ic"><use href="#ic-tab-dmg"/></svg>Журналы</button>
   </nav>
 
   <main>
@@ -720,6 +760,27 @@
           <div class="row2" id="justiceFields">
             <div class="field"><label>Бонус Справедливости, %</label><input type="number" id="justiceBonus" value="0" step="1"></div>
             <div class="field"><label>Модификатор Натиска, ×</label><input type="number" id="natiskMod" value="1.0" step="0.05"></div>
+          </div>
+
+          <div class="field">
+            <label>Справочник: модификатор по Справедливости и скорости атаки</label>
+            <div class="row2">
+              <select id="justiceTableSpeed">
+                <option value="ochmed">Оч. Медленная</option>
+                <option value="med">Медленная</option>
+                <option value="sred" selected>Средняя</option>
+                <option value="vys">Высокая</option>
+                <option value="ochvys">Оч. Высокая</option>
+              </select>
+              <select id="justiceTableLvl">
+                <option value="1">Справедливость I</option>
+                <option value="2">Справедливость II</option>
+                <option value="3">Справедливость III</option>
+                <option value="4">Справедливость IV</option>
+                <option value="5">Справедливость V</option>
+              </select>
+            </div>
+            <div class="desc-hint" id="justiceTableOut"></div>
           </div>
         </div>
       </div>
@@ -866,6 +927,21 @@
     <!-- ============ TAB: DOSSIER ============ -->
     <section class="panel" id="panel-dossier">
       <div id="dossierContent">Загрузка анкеты…</div>
+    </section>
+
+    <!-- ============ TAB: ARSENAL ============ -->
+    <section class="panel" id="panel-arsenal">
+      <div class="section-title">Арсенал Э.П.О.С.</div>
+      <div class="hint" style="margin-bottom:10px;">Общий реестр оружия, брони и даров, созданных Аномалиями. Агенты могут быстро экипировать любой предмет отсюда.</div>
+      <div class="chipset" id="arsenalFilter" style="margin-bottom:10px;">
+        <div class="chip sel" data-f="all">Все</div>
+        <div class="chip" data-f="weapon">Оружие</div>
+        <div class="chip" data-f="armor">Броня</div>
+        <div class="chip" data-f="gift">Дары</div>
+        <div class="chip" data-f="resonance">Резонанс</div>
+      </div>
+      <button class="runbtn ghost" id="arsenalRefresh">Обновить список →</button>
+      <div id="arsenalList" style="margin-top:14px;"><div class="hint">Загрузка…</div></div>
     </section>
 
     <!-- ============ TAB: REGISTRY (sephirah only) ============ -->
@@ -1059,7 +1135,7 @@
   }
 
   /* ============ TABS ============ */
-  const tabNames = {dmg:'Урон', resonance:'Резонанс', aggro:'Агро', ebox:'Работа', dossier:'Досье', registry:'Реестр', logs:'Журналы'};
+  const tabNames = {dmg:'Урон', resonance:'Резонанс', aggro:'Агро', ebox:'Работа', dossier:'Досье', arsenal:'Арсенал', registry:'Реестр', logs:'Журналы'};
   const LOG_CATEGORY_TABS = ['dmg','resonance','aggro','ebox'];
   document.querySelectorAll('nav.tabs button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -1465,6 +1541,114 @@
   };
 
   const STAT_LABELS = {courage:'Мужество', wisdom:'Мудрость', endurance:'Выдержка', justice:'Справедливость'};
+
+  function statLevelInfo(v){
+    v = Math.max(0, Math.min(100, parseInt(v)||0));
+    if(v<=29) return {level:1, tier:'ZAYIN'};
+    if(v<=44) return {level:2, tier:'TETH'};
+    if(v<=59) return {level:3, tier:'HE'};
+    if(v<=84) return {level:4, tier:'WAW'};
+    return {level:5, tier:'ALEPH'};
+  }
+  function agentLevelFromSum(sum){
+    if(sum<=5) return 1;
+    if(sum<=9) return 2;
+    if(sum<=13) return 3;
+    if(sum<=17) return 4;
+    return 5;
+  }
+  const ROMAN = ['','I','II','III','IV','V'];
+
+  function signed(n){ n = n||0; return (n>=0?'+':'')+n; }
+
+  function computeAgentStatBreakdown(acc){
+    const base = acc.stats || {};
+    const savedBonus = acc.statBonus || {};
+    const deptAuto = acc.deptBonus || {};
+    // Черты и Дары теперь ВСЕГДА считаются напрямую из своих редакторов — не переопределяются вручную.
+    const traitsAuto = {courage:0, wisdom:0, endurance:0, justice:0};
+    (acc.traits||[]).forEach(t=>{
+      const d = t.deltas||{};
+      Object.keys(traitsAuto).forEach(k=>{ traitsAuto[k] += parseInt(d[k])||0; });
+    });
+    // Дары теперь дают либо бонус к самой характеристике (courage/wisdom/endurance/justice),
+    // либо ПРЯМОЙ бонус к HP/SP (hp/sp) — это два разных эффекта, не путать друг с другом.
+    const giftsAuto = {courage:0, wisdom:0, endurance:0, justice:0};
+    let giftsDirectHP = 0, giftsDirectSP = 0;
+    (acc.gifts||[]).forEach(g=>{
+      giftsAuto.courage += parseInt(g.courage)||0;
+      giftsAuto.wisdom += parseInt(g.wisdom)||0;
+      giftsAuto.endurance += parseInt(g.endurance)||0;
+      giftsAuto.justice += parseInt(g.justice)||0;
+      giftsDirectHP += parseInt(g.hp)||0;
+      giftsDirectSP += parseInt(g.sp)||0;
+    });
+    const out = {};
+    Object.keys(STAT_LABELS).forEach(k=>{
+      const b = parseInt(base[k])||0;
+      const sb = savedBonus[k];
+      const dept = sb ? (parseInt(sb.dept)||0) : (parseInt(deptAuto[k])||0);
+      const gifts = giftsAuto[k];
+      const traits = traitsAuto[k];
+      const total = sb && sb.total !== undefined ? (parseInt(sb.total)||0) : (dept+gifts+traits);
+      const final = b+total;
+      out[k] = {base:b, dept, gifts, traits, total, final, level: statLevelInfo(final).level};
+    });
+    out.extraHP = giftsDirectHP;
+    out.extraSP = giftsDirectSP;
+    return out;
+  }
+  function formatStatLine(label, info){
+    return label+' ['+ROMAN[info.level]+'] — '+info.base+' + '+signed(info.total)+' = '+info.final+
+      ' ('+signed(info.dept)+' \\ '+signed(info.gifts)+' \\ '+signed(info.traits)+')';
+  }
+
+  const JUSTICE_DMG_TABLE = {
+    ochmed: {1:'100%', 2:'150%', 3:'200%', 4:'250%', 5:'300%'},
+    med:    {1:'100%', 2:'140%', 3:'190%', 4:'240%', 5:'290%'},
+    sred:   {1:'100%', 2:'180%', 3:'240%', 4:'300%', 5:'320%'},
+    vys:    {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}},
+    ochvys: {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}}
+  };
+  function updateJusticeTableOut(){
+    const speed = document.getElementById('justiceTableSpeed').value;
+    const lvl = parseInt(document.getElementById('justiceTableLvl').value);
+    const entry = JUSTICE_DMG_TABLE[speed][lvl];
+    const out = document.getElementById('justiceTableOut');
+    if(typeof entry === 'string'){
+      out.textContent = 'Модификатор урона: '+entry+' (применяется в последнюю очередь ко всему урону хода).';
+    } else {
+      out.textContent = 'Доп. атаки: '+entry.extra+' · Модификатор по каждой атаке (по порядку): '+entry.mod+' — применяйте вручную к каждой атаке отдельно, не как единый множитель.';
+    }
+  }
+  document.getElementById('justiceTableSpeed').addEventListener('change', updateJusticeTableOut);
+  document.getElementById('justiceTableLvl').addEventListener('change', updateJusticeTableOut);
+  updateJusticeTableOut();
+
+  // Wires a stat-value block (4 inputs .statInput) to live-compute per-stat level, total agent level, and sync Speed = Justice.
+  function wireStatBlock(containerId, levelOutId, speedInputId){
+    const container = document.getElementById(containerId);
+    const update = ()=>{
+      let sum = 0;
+      container.querySelectorAll('.statInput').forEach(inp=>{
+        const info = statLevelInfo(inp.value);
+        sum += info.level;
+        const hintEl = container.querySelector('[data-lvlfor="'+inp.dataset.stat+'"]');
+        if(hintEl) hintEl.textContent = 'Уровень '+ROMAN[info.level]+' ('+info.tier+')';
+        if(inp.dataset.stat === 'justice' && speedInputId){
+          const speedEl = document.getElementById(speedInputId);
+          if(speedEl) speedEl.value = inp.value;
+        }
+      });
+      const lvl = agentLevelFromSum(sum);
+      const out = document.getElementById(levelOutId);
+      if(out) out.textContent = 'Уровень агента: '+ROMAN[lvl]+' (сумма уровней характеристик: '+sum+')';
+      return lvl;
+    };
+    container.querySelectorAll('.statInput').forEach(inp=>inp.addEventListener('input', update));
+    update();
+    return update;
+  }
   const WORK_CATS = [
     {key:'intuition', label:'6.1. Интуиция'},
     {key:'insight', label:'6.2. Понимание'},
@@ -1716,16 +1900,6 @@
     });
   }
 
-  function updateAgentPointCounter(){
-    let sum = 0;
-    document.querySelectorAll('#ag_statRow .stepper input').forEach(i=>sum += parseInt(i.value)||0);
-    const remain = 60 - sum;
-    const el = document.getElementById('ag_pointCounter');
-    el.textContent = 'Остаток очков: ' + remain + '/60' + (remain===0 ? ' ✓' : '');
-    el.className = 'point-counter ' + (remain===0 ? 'ok' : 'bad');
-    return remain === 0;
-  }
-
   function buildTalentSelectHTML(id){
     let html = '<select id="'+id+'"><option value="">— выбрать талант —</option>';
     let lastTag = null;
@@ -1783,11 +1957,6 @@
         <div><div class="stepper" data-k="wisdom"><button class="dn">−</button><input type="number" value="${d.wisdom||0}"><button class="up">+</button></div><div class="stepper-label">Муд.</div></div>
         <div><div class="stepper" data-k="endurance"><button class="dn">−</button><input type="number" value="${d.endurance||0}"><button class="up">+</button></div><div class="stepper-label">Выд.</div></div>
         <div><div class="stepper" data-k="justice"><button class="dn">−</button><input type="number" value="${d.justice||0}"><button class="up">+</button></div><div class="stepper-label">Спр.</div></div>
-      </div>
-      <div class="stepper-row wide">
-        <div><div class="stepper" data-k="maxhp"><button class="dn">−</button><input type="number" value="${d.maxhp||0}"><button class="up">+</button></div><div class="stepper-label">Макс. HP</div></div>
-        <div><div class="stepper" data-k="maxsp"><button class="dn">−</button><input type="number" value="${d.maxsp||0}"><button class="up">+</button></div><div class="stepper-label">Макс. SP</div></div>
-        <div><div class="stepper" data-k="speed"><button class="dn">−</button><input type="number" value="${d.speed||0}"><button class="up">+</button></div><div class="stepper-label">Скорость</div></div>
       </div>`;
     wrap.appendChild(card);
     card.querySelectorAll('.stepper').forEach(st=>wireStepper(st));
@@ -1807,10 +1976,17 @@
         <button class="rm">✕</button>
       </div>
       <textarea class="giftDesc" placeholder="Описание дара">${p.desc||''}</textarea>
+      <div class="hint" style="margin:6px 0 3px;">Бонус к самой характеристике</div>
       <div class="stepper-row">
-        <div><div class="stepper" data-k="hp"><button class="dn">−</button><input type="number" value="${p.hp||0}"><button class="up">+</button></div><div class="stepper-label">HP</div></div>
-        <div><div class="stepper" data-k="sp"><button class="dn">−</button><input type="number" value="${p.sp||0}"><button class="up">+</button></div><div class="stepper-label">SP</div></div>
-        <div><div class="stepper" data-k="speed"><button class="dn">−</button><input type="number" value="${p.speed||0}"><button class="up">+</button></div><div class="stepper-label">Скорость</div></div>
+        <div><div class="stepper" data-k="courage"><button class="dn">−</button><input type="number" value="${p.courage||0}"><button class="up">+</button></div><div class="stepper-label">Мужество</div></div>
+        <div><div class="stepper" data-k="wisdom"><button class="dn">−</button><input type="number" value="${p.wisdom||0}"><button class="up">+</button></div><div class="stepper-label">Мудрость</div></div>
+        <div><div class="stepper" data-k="endurance"><button class="dn">−</button><input type="number" value="${p.endurance||0}"><button class="up">+</button></div><div class="stepper-label">Выдержка</div></div>
+        <div><div class="stepper" data-k="justice"><button class="dn">−</button><input type="number" value="${p.justice||0}"><button class="up">+</button></div><div class="stepper-label">Справедливость</div></div>
+      </div>
+      <div class="hint" style="margin:8px 0 3px;">Прямой бонус (минуя характеристику)</div>
+      <div class="stepper-row" style="grid-template-columns:repeat(3,1fr);">
+        <div><div class="stepper" data-k="hp"><button class="dn">−</button><input type="number" value="${p.hp||0}"><button class="up">+</button></div><div class="stepper-label">HP напрямую</div></div>
+        <div><div class="stepper" data-k="sp"><button class="dn">−</button><input type="number" value="${p.sp||0}"><button class="up">+</button></div><div class="stepper-label">SP напрямую</div></div>
         <div><div class="stepper" data-k="work"><button class="dn">−</button><input type="number" value="${p.work||0}"><button class="up">+</button></div><div class="stepper-label">Шанс работы,%</div></div>
       </div>`;
     wrap.appendChild(card);
@@ -1819,19 +1995,56 @@
   }
 
   let agentFormInited = false;
+  function wireAgentStatSteppers(containerId, counterElId, levelOutId, hpInputId, spInputId, speedInputId){
+    const container = document.getElementById(containerId);
+    const update = ()=>{
+      let sum = 0, levelSum = 0;
+      container.querySelectorAll('.stepper').forEach(st=>{
+        const v = parseInt(st.querySelector('input').value)||0;
+        sum += v;
+        levelSum += statLevelInfo(v).level;
+        if(st.dataset.stat === 'justice' && speedInputId){
+          const speedEl = document.getElementById(speedInputId);
+          if(speedEl) speedEl.value = v;
+        }
+        if(st.dataset.stat === 'courage' && hpInputId){
+          const hpEl = document.getElementById(hpInputId);
+          if(hpEl) hpEl.value = v;
+        }
+        if(st.dataset.stat === 'wisdom' && spInputId){
+          const spEl = document.getElementById(spInputId);
+          if(spEl) spEl.value = v;
+        }
+      });
+      const remain = 60 - sum;
+      if(counterElId){
+        const el = document.getElementById(counterElId);
+        el.textContent = 'Остаток очков: ' + remain + '/60' + (remain===0 ? ' ✓' : '');
+        el.className = 'point-counter ' + (remain===0 ? 'ok' : 'bad');
+      }
+      const lvl = agentLevelFromSum(levelSum);
+      if(levelOutId) document.getElementById(levelOutId).textContent = 'Уровень агента: '+ROMAN[lvl]+' (сумма уровней характеристик: '+levelSum+')';
+      return {valid: remain===0, level: lvl};
+    };
+    container.querySelectorAll('.stepper').forEach(st=>{
+      wireStepper(st, 10, 20);
+      st.querySelector('input').addEventListener('input', update);
+    });
+    update();
+    return update;
+  }
+
   function initAgentForm(){
     if(agentFormInited) return;
     agentFormInited = true;
-    document.querySelectorAll('#ag_statRow .stepper').forEach(st=>{
-      wireStepper(st, 10, 20);
-      st.querySelector('input').addEventListener('input', updateAgentPointCounter);
-    });
-    updateAgentPointCounter();
+    const updateStats = wireAgentStatSteppers('ag_statRow', 'ag_pointCounter', 'ag_levelOut', 'ag_maxhp', 'ag_maxsp', 'ag_speed');
     addTraitCard('ag_traits');
     document.getElementById('ag_addTrait').addEventListener('click', ()=>addTraitCard('ag_traits'));
-    renderAgentTalentSlots(1, 'ag_talentSlots', 'ag_talentSlot', []);
-    document.getElementById('ag_level').addEventListener('change', (e)=>{
-      renderAgentTalentSlots(parseInt(e.target.value), 'ag_talentSlots', 'ag_talentSlot', []);
+    renderAgentTalentSlots(updateStats().level, 'ag_talentSlots', 'ag_talentSlot', []);
+    document.getElementById('ag_statRow').querySelectorAll('.stepper input').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        renderAgentTalentSlots(updateStats().level, 'ag_talentSlots', 'ag_talentSlot', []);
+      });
     });
   }
 
@@ -1843,12 +2056,19 @@
     const age = parseInt(document.getElementById('ag_age').value)||0;
     if(!login || !pin){ msg.textContent='Заполните логин и PIN.'; msg.className='auth-msg show err'; return; }
     if(age < 18){ msg.textContent='Возраст агента должен быть не менее 18 лет.'; msg.className='auth-msg show err'; return; }
-    if(!updateAgentPointCounter()){ msg.textContent='Распределите ровно 60 очков характеристик (10–20 на каждую).'; msg.className='auth-msg show err'; return; }
     const id = slugify(login);
     if(await getAccountRaw(id)){ msg.textContent='Такой логин уже занят.'; msg.className='auth-msg show err'; return; }
 
     const stats = {};
-    document.querySelectorAll('#ag_statRow .stepper').forEach(st=>{ stats[st.dataset.stat] = parseInt(st.querySelector('input').value)||0; });
+    let levelSum = 0, pointSum = 0;
+    document.querySelectorAll('#ag_statRow .stepper').forEach(st=>{
+      const v = parseInt(st.querySelector('input').value)||0;
+      stats[st.dataset.stat] = v;
+      pointSum += v;
+      levelSum += statLevelInfo(v).level;
+    });
+    if(pointSum !== 60){ msg.textContent='Распределите ровно 60 очков характеристик (10–20 на каждую).'; msg.className='auth-msg show err'; return; }
+    const level = agentLevelFromSum(levelSum);
 
     const traits = [];
     document.querySelectorAll('#ag_traits .trait-card').forEach(card=>{
@@ -1857,7 +2077,6 @@
       traits.push({ name: card.querySelector('.traitName').value, effect: card.querySelector('.traitEffect').value, deltas });
     });
 
-    const level = parseInt(document.getElementById('ag_level').value);
     const slots = level>=5?3:(level>=3?2:1);
     const talents = [];
     for(let i=0;i<slots;i++){
@@ -2082,14 +2301,56 @@
     badge.style.display = 'inline-flex';
     badge.textContent = ROLE_LABEL[acc.type] + ' · ' + (acc.name || acc.login);
     document.getElementById('logoutBtn').style.display = 'inline-block';
-    document.querySelectorAll('nav.tabs button').forEach(b=>{
-      const roles = (b.dataset.roles||'').split(',');
-      b.style.display = roles.includes(acc.type) ? 'flex' : 'none';
-    });
+    document.getElementById('modeCombatCard').style.display = acc.type==='sephirah' ? 'none' : 'flex';
     renderDossier(acc);
+    renderArsenalList();
     if(acc.type === 'sephirah'){ renderRegistry(); renderLogAccountOptions(); }
     logEvent('Вход в систему выполнен: '+ROLE_LABEL[acc.type]+' «'+(acc.name||acc.login)+'».');
+    showModeSelect();
   }
+
+  let currentMode = null;
+
+  function showModeSelect(){
+    document.getElementById('modeSelect').style.display = 'block';
+    document.getElementById('navTabs').style.display = 'none';
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('backToModesBtn').style.display = 'none';
+    currentMode = null;
+  }
+
+  function enterMode(mode){
+    currentMode = mode;
+    document.getElementById('modeSelect').style.display = 'none';
+    document.getElementById('navTabs').style.display = 'flex';
+    document.getElementById('backToModesBtn').style.display = 'inline-block';
+    let firstVisible = null;
+    document.querySelectorAll('#navTabs button').forEach(b=>{
+      const roles = (b.dataset.roles||'').split(',');
+      const show = b.dataset.mode===mode && roles.includes(currentSession.type);
+      b.style.display = show ? 'flex' : 'none';
+      b.classList.remove('active');
+      if(show && !firstVisible) firstVisible = b;
+    });
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    if(firstVisible){
+      firstVisible.classList.add('active');
+      document.getElementById('panel-'+firstVisible.dataset.tab).classList.add('active');
+      if(LOG_CATEGORY_TABS.includes(firstVisible.dataset.tab)) currentTabCategory = tabNames[firstVisible.dataset.tab];
+    }
+    logEvent('Открыт режим: '+(mode==='profile'?'Профиль':'Боевой режим')+'.');
+  }
+
+  document.querySelectorAll('.mode-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      beep(340,.05);
+      enterMode(card.dataset.mode);
+    });
+  });
+  document.getElementById('backToModesBtn').addEventListener('click', ()=>{
+    beep(300,.03);
+    showModeSelect();
+  });
 
   async function afterBoot(){
     const sid = await storeGet('session', false);
@@ -2136,26 +2397,37 @@
         <div class="sec-edit" id="${sectionId}_edit" style="display:none;">${editInner}</div>
       </div>`;
 
+    const bd = computeAgentStatBreakdown(acc);
+    const effLevelSum = Object.keys(bd).reduce((s,k)=>s+bd[k].level, 0);
+    const effLevel = agentLevelFromSum(effLevelSum);
+
     const statsReadInner = `
-        <div class="row2">${Object.keys(STAT_LABELS).map(k=>fld(STAT_LABELS[k], (acc.stats||{})[k])).join('')}</div>
-        <div class="row3">${fld('Уровень', ['','I','II','III','IV','V'][acc.level]||acc.level)}${fld('Макс. HP', acc.maxhp)}${fld('Макс. SP', acc.maxsp)}</div>
-        <div class="row2">${fld('Скорость', acc.speed)}</div>`;
+        <div class="row2">${Object.keys(STAT_LABELS).map(k=>fld(STAT_LABELS[k], formatStatLine('', bd[k]).replace(/^ /,''))).join('')}</div>
+        <div class="row3">${fld('Уровень агента', ROMAN[effLevel])}${fld('Макс. HP (Мужество + дары)', bd.courage.final+bd.extraHP)}${fld('Макс. SP (Мудрость + дары)', bd.wisdom.final+bd.extraSP)}</div>
+        <div class="row2">${fld('Скорость (= Справедливость)', bd.justice.final)}</div>`;
     const statsEditInner = `
-        <div class="field"><label>Уровень</label>
-          <select id="dos_ag_level">${[1,2,3,4,5].map(l=>`<option value="${l}" ${l==acc.level?'selected':''}>${['','I','II','III','IV','V'][l]}</option>`).join('')}</select>
-        </div>
-        <div class="row2">
-          ${Object.keys(STAT_LABELS).map(k=>`<div class="field"><label>${STAT_LABELS[k]}</label><input type="number" id="dos_ag_stat_${k}" value="${(acc.stats||{})[k]||0}"></div>`).join('')}
-        </div>
-        <div class="row3">
-          <div class="field"><label>Макс. HP</label><input type="number" id="dos_ag_maxhp" value="${acc.maxhp||0}"></div>
-          <div class="field"><label>Макс. SP</label><input type="number" id="dos_ag_maxsp" value="${acc.maxsp||0}"></div>
-          <div class="field"><label>Скорость</label><input type="number" id="dos_ag_speed" value="${acc.speed||0}"></div>
-        </div>
+        <div class="hint">Базовое значение обычно не меняется после регистрации — редактируйте его только по согласованию с Сефирой. Дальнейший рост — через 4 поля бонуса ниже.</div>
+        ${Object.keys(STAT_LABELS).map(k=>`
+        <div class="field" style="margin-bottom:16px;">
+          <label>${STAT_LABELS[k]} — <span class="baseDisplay" data-stat="${k}">база ${bd[k].base}</span>
+            <button type="button" class="gear-btn" data-editbase="${k}" title="Изменить базовое значение" style="width:20px;height:20px;vertical-align:-6px;margin-left:4px;"><svg class="ic-sm" style="margin:0;"><use href="#ic-tab-work"/></svg></button>
+            <input type="number" class="baseEditInput" data-stat="${k}" value="${bd[k].base}" min="0" max="100" style="display:none;width:80px;margin-left:6px;vertical-align:-6px;">
+          </label>
+          <div class="row2" style="margin-bottom:6px;">
+            <div><div class="stepper-label" style="text-align:left;margin-bottom:3px;">Департамент</div><input type="number" class="statBonusInput" data-stat="${k}" data-part="dept" value="${bd[k].dept}"></div>
+            <div><div class="stepper-label" style="text-align:left;margin-bottom:3px;">Дары (авто)</div><div style="padding:8px 10px;border:1px solid var(--line-soft);border-radius:3px;background:var(--bg);font-size:12.5px;">${signed(bd[k].gifts)}</div></div>
+          </div>
+          <div class="row2">
+            <div><div class="stepper-label" style="text-align:left;margin-bottom:3px;">Черты (авто)</div><div style="padding:8px 10px;border:1px solid var(--line-soft);border-radius:3px;background:var(--bg);font-size:12.5px;">${signed(bd[k].traits)}</div></div>
+            <div><div class="stepper-label" style="text-align:left;margin-bottom:3px;">Итоговый бонус</div><input type="number" class="statBonusInput" data-stat="${k}" data-part="total" value="${bd[k].total}"></div>
+          </div>
+          <div class="desc-hint" data-lvlfor="${k}">${formatStatLine('', bd[k]).replace(/^ /,'')}</div>
+        </div>`).join('')}
+        <div class="point-counter ok" id="dos_ag_levelOut">Уровень агента: ${ROMAN[effLevel]}</div>
         <button class="runbtn ghost" id="dos_ag_saveStats">Сохранить →</button>`;
     const statsBlock = isOwner
       ? ownerCard('Характеристики', 'dos_ag_stats', statsReadInner, statsEditInner)
-      : `<div class="form-card"><div class="ftitle">Характеристики — уровень ${['','I','II','III','IV','V'][acc.level]||acc.level}</div>${statsReadInner}</div>`;
+      : `<div class="form-card"><div class="ftitle">Характеристики — уровень ${ROMAN[effLevel]}</div>${statsReadInner}</div>`;
 
     const traitsEditInner = `
         <div id="dos_ag_traits"></div>
@@ -2173,19 +2445,23 @@
       ? ownerCard('Боевые таланты', 'dos_ag_talents_sec', talentsHtml, talentsEditInner)
       : `<div class="form-card"><div class="ftitle">Боевые таланты</div>${talentsHtml}</div>`;
 
-    const existingGifts = acc.gifts || (acc.gift ? [{name: acc.gift, desc:'', hp:0, sp:0, speed:0, work:0}] : []);
+    const existingGifts = acc.gifts || (acc.gift ? [{name: acc.gift, desc:''}] : []);
     const giftsHtml = existingGifts.map(g=>{
-      const stats = ['hp','sp','speed','work'].filter(k=>g[k]).map(k=>{
-        const lbl = {hp:'HP',sp:'SP',speed:'Скор',work:'Шанс работы'}[k];
+      const stats = ['courage','wisdom','endurance','justice','hp','sp','work'].filter(k=>g[k]).map(k=>{
+        const lbl = {courage:'Мужество',wisdom:'Мудрость',endurance:'Выдержка',justice:'Справедливость',hp:'HP напрямую',sp:'SP напрямую',work:'Шанс работы'}[k];
         return lbl+': '+(g[k]>0?'+':'')+g[k]+(k==='work'?'%':'');
       }).join(' · ');
       return `<div class="trait-card"><b>${g.name||'—'}</b><div class="hint" style="margin:4px 0;">${g.desc||''}</div><div style="font-size:10.5px;color:var(--amber);">${stats}</div></div>`;
     }).join('') || '<div class="hint">Дары не добавлены.</div>';
 
+    const deptB = acc.deptBonus || {};
+    const deptBonusStr = Object.keys(STAT_LABELS).filter(k=>deptB[k]).map(k=>STAT_LABELS[k]+': '+signed(deptB[k])).join(' · ') || 'нет бонусов';
+
     const equipReadInner = `
         <div class="row2">${fld('Оружие', acc.weapon)}${fld('Броня', acc.armor)}</div>
         <div class="field"><label>Дары</label>${giftsHtml}</div>
-        <div class="row2">${fld('Департамент', acc.dept)}${fld('Должность', acc.pos)}</div>`;
+        <div class="row2">${fld('Департамент', acc.dept)}${fld('Должность', acc.pos)}</div>
+        ${fld('Бонус департамента', deptBonusStr)}`;
     const equipEditInner = `
         <div class="row2">
           <div class="field"><label>Оружие</label><input type="text" id="dos_ag_weapon" value="${acc.weapon||''}"></div>
@@ -2197,6 +2473,10 @@
         <div class="row2" style="margin-top:10px;">
           <div class="field"><label>Департамент</label><input type="text" id="dos_ag_dept" value="${acc.dept||''}"></div>
           <div class="field"><label>Должность</label><input type="text" id="dos_ag_pos" value="${acc.pos||''}"></div>
+        </div>
+        <div class="field"><label>Бонус департамента (к характеристикам)</label></div>
+        <div class="stepper-row">
+          ${Object.keys(STAT_LABELS).map(k=>`<div><div class="stepper" data-deptk="${k}"><button class="dn">−</button><input type="number" value="${deptB[k]||0}"><button class="up">+</button></div><div class="stepper-label">${STAT_LABELS[k].slice(0,4)}.</div></div>`).join('')}
         </div>
         <button class="runbtn ghost" id="dos_ag_saveEquip">Сохранить →</button>`;
     const equipBlock = isOwner
@@ -2259,9 +2539,29 @@
         ${fld('Условия содержания (предметы/мебель)', acc.furniture)}
       </div>
       <div class="form-card">
-        <div class="ftitle">Э.П.О.С.</div>
-        <div class="row2">${fld('Дар', acc.egoGift)}${fld('Оружие', acc.egoWeapon)}</div>
-        <div class="row2">${fld('Броня', acc.egoArmor)}${fld('Резонанс', acc.egoRes)}</div>
+        <div class="card-head">
+          <div class="ftitle">Э.П.О.С. (Арсенал)</div>
+          ${isOwner ? `<button class="gear-btn" data-target="an_arsenal_sec" title="Создать Э.П.О.С."><svg class="ic-sm"><use href="#ic-tab-arsenal"/></svg></button>` : ''}
+        </div>
+        <div class="sec-view" id="an_arsenal_sec_view">
+          <div id="an_myArsenalList"><div class="hint">Загрузка…</div></div>
+        </div>
+        ${isOwner ? `
+        <div class="sec-edit" id="an_arsenal_sec_edit" style="display:none;">
+          <div class="field"><label>Тип</label>
+            <select id="an_ego_type">
+              <option value="weapon">Оружие</option>
+              <option value="armor">Броня</option>
+              <option value="gift">Дар</option>
+              <option value="resonance">Резонанс</option>
+            </select>
+          </div>
+          <div class="field"><label>Название</label><input type="text" id="an_ego_name"></div>
+          <div class="field"><label>Описание</label><textarea id="an_ego_desc"></textarea></div>
+          <div id="an_ego_typeFields"></div>
+          <button class="runbtn" id="an_ego_submit">Добавить в Арсенал →</button>
+          <div class="auth-msg" id="an_ego_msg"></div>
+        </div>` : ''}
       </div>
       <div class="form-card">
         <div class="ftitle">История</div>
@@ -2314,13 +2614,20 @@
 
     if(acc.type === 'anomaly'){
       setTimeout(()=>{ const p = document.getElementById('anomalyPhrase'); if(p) p.classList.add('show'); }, 200);
+      populateMyArsenal(acc);
+      if(isOwner){
+        renderEgoTypeFields('weapon');
+        document.getElementById('an_ego_type').addEventListener('change', (e)=>renderEgoTypeFields(e.target.value));
+        document.getElementById('an_ego_submit').addEventListener('click', ()=>submitEgoItem(acc));
+      }
     }
 
-    document.querySelectorAll('.gear-btn').forEach(btn=>{
+    document.querySelectorAll('.gear-btn[data-target]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const target = btn.dataset.target;
         const view = document.getElementById(target+'_view');
         const edit = document.getElementById(target+'_edit');
+        if(!view || !edit) return;
         const showEdit = edit.style.display === 'none';
         edit.style.display = showEdit ? 'block' : 'none';
         view.style.display = showEdit ? 'none' : 'block';
@@ -2329,6 +2636,9 @@
     });
 
     if(acc.type === 'agent' && isOwner){
+      const bdInit = computeAgentStatBreakdown(acc);
+      const effLevel = agentLevelFromSum(Object.keys(bdInit).reduce((s,k)=>s+bdInit[k].level, 0));
+
       // traits editor, prefilled
       const traitsWrap = document.getElementById('dos_ag_traits');
       if(acc.traits && acc.traits.length){
@@ -2342,23 +2652,63 @@
       const existingGiftsInit = acc.gifts || (acc.gift ? [{name: acc.gift, desc:'', hp:0, sp:0, speed:0, work:0}] : []);
       existingGiftsInit.forEach(g=>addGiftCard('dos_ag_gifts', g));
       document.getElementById('dos_ag_addGift').addEventListener('click', ()=>addGiftCard('dos_ag_gifts', null));
+      document.querySelectorAll('#dos_ag_equip_sec_edit [data-deptk]').forEach(st=>wireStepper(st));
 
-      // talent slots, prefilled, tied to current level select
-      const levelSel = document.getElementById('dos_ag_level');
-      renderAgentTalentSlots(parseInt(levelSel.value), 'dos_ag_talentSlots', 'dos_ag_talentSlot', acc.talents||[]);
-      levelSel.addEventListener('change', ()=>{
-        renderAgentTalentSlots(parseInt(levelSel.value), 'dos_ag_talentSlots', 'dos_ag_talentSlot', acc.talents||[]);
+      // live level calc from the 4 editable bonus fields (dept/gifts/traits/total) per stat
+      function liveUpdateDosStats(){
+        const tempBonus = {};
+        document.querySelectorAll('.statBonusInput').forEach(inp=>{
+          tempBonus[inp.dataset.stat] = tempBonus[inp.dataset.stat] || {};
+          tempBonus[inp.dataset.stat][inp.dataset.part] = parseInt(inp.value)||0;
+        });
+        const bd2 = computeAgentStatBreakdown(Object.assign({}, acc, {statBonus: tempBonus}));
+        document.querySelectorAll('[data-lvlfor]').forEach(hintEl=>{
+          const k = hintEl.dataset.lvlfor;
+          if(bd2[k]) hintEl.textContent = formatStatLine('', bd2[k]).replace(/^ /,'');
+        });
+        const sum = Object.keys(bd2).reduce((s,k)=>s+bd2[k].level, 0);
+        const lvl = agentLevelFromSum(sum);
+        const lvlOut = document.getElementById('dos_ag_levelOut');
+        if(lvlOut) lvlOut.textContent = 'Уровень агента: '+ROMAN[lvl];
+        return lvl;
+      }
+      renderAgentTalentSlots(effLevel, 'dos_ag_talentSlots', 'dos_ag_talentSlot', acc.talents||[]);
+      document.querySelectorAll('.statBonusInput').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          renderAgentTalentSlots(liveUpdateDosStats(), 'dos_ag_talentSlots', 'dos_ag_talentSlot', acc.talents||[]);
+        });
+      });
+
+      document.querySelectorAll('[data-editbase]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const stat = btn.dataset.editbase;
+          if(!confirm('Осторожно, вы собираетесь менять базовое число своих характеристик. Вы уверены?')) return;
+          const display = document.querySelector('.baseDisplay[data-stat="'+stat+'"]');
+          const input = document.querySelector('.baseEditInput[data-stat="'+stat+'"]');
+          display.style.display = 'none';
+          btn.style.display = 'none';
+          input.style.display = 'inline-block';
+          input.focus();
+        });
       });
 
       document.getElementById('dos_ag_saveStats').addEventListener('click', async ()=>{
-        acc.level = parseInt(document.getElementById('dos_ag_level').value);
         acc.stats = acc.stats || {};
-        Object.keys(STAT_LABELS).forEach(k=>{ acc.stats[k] = parseInt(document.getElementById('dos_ag_stat_'+k).value)||0; });
-        acc.maxhp = document.getElementById('dos_ag_maxhp').value;
-        acc.maxsp = document.getElementById('dos_ag_maxsp').value;
-        acc.speed = document.getElementById('dos_ag_speed').value;
+        document.querySelectorAll('.baseEditInput').forEach(inp=>{
+          if(inp.style.display !== 'none'){
+            acc.stats[inp.dataset.stat] = Math.max(0, Math.min(100, parseInt(inp.value)||0));
+          }
+        });
+        const statBonus = {};
+        document.querySelectorAll('.statBonusInput').forEach(inp=>{
+          statBonus[inp.dataset.stat] = statBonus[inp.dataset.stat] || {};
+          statBonus[inp.dataset.stat][inp.dataset.part] = parseInt(inp.value)||0;
+        });
+        acc.statBonus = statBonus;
+        const bd2 = computeAgentStatBreakdown(acc);
+        acc.level = agentLevelFromSum(Object.keys(bd2).reduce((s,k)=>s+bd2[k].level,0));
         await saveAccount(acc);
-        logEvent('Агент «'+(acc.name||acc.login)+'» изменил характеристики (уровень '+acc.level+').');
+        logEvent('Агент «'+(acc.name||acc.login)+'» изменил характеристики (уровень '+ROMAN[acc.level]+').');
         renderDossier(acc);
       });
 
@@ -2376,7 +2726,8 @@
       });
 
       document.getElementById('dos_ag_saveTalents').addEventListener('click', async ()=>{
-        const level = parseInt(document.getElementById('dos_ag_level').value);
+        const bd2 = computeAgentStatBreakdown(acc);
+        const level = agentLevelFromSum(Object.keys(bd2).reduce((s,k)=>s+bd2[k].level,0));
         const slots = level>=5?3:(level>=3?2:1);
         const talents = [];
         for(let i=0;i<slots;i++){
@@ -2405,6 +2756,11 @@
         delete acc.gift;
         acc.dept = document.getElementById('dos_ag_dept').value;
         acc.pos = document.getElementById('dos_ag_pos').value;
+        const deptBonus = {};
+        document.querySelectorAll('#dos_ag_equip_sec_edit [data-deptk]').forEach(st=>{
+          deptBonus[st.dataset.deptk] = parseInt(st.querySelector('input').value)||0;
+        });
+        acc.deptBonus = deptBonus;
         await saveAccount(acc);
         logEvent('Агент «'+(acc.name||acc.login)+'» изменил экипировку/службу.');
         renderDossier(acc);
@@ -2435,6 +2791,393 @@
       renderRegistry();
     });
   });
+
+  /* ============================================================
+     ARSENAL (Э.П.О.С. registry)
+  ============================================================ */
+  const ARSENAL_TYPE_LABEL = {weapon:'Оружие', armor:'Броня', gift:'Дар', resonance:'Резонанс'};
+  const ATK_SPEED_LABEL = {ochmed:'Оч. Медленная', med:'Медленная', sred:'Средняя', vys:'Высокая', ochvys:'Оч. Высокая'};
+  const RISK_LEVELS_SHORT = ['ZAYIN','TETH','HE','WAW','ALEPH'];
+
+  async function saveArsenalItem(item){ return storeSet('arsenal:'+item.id, JSON.stringify(item), true); }
+  async function getArsenalItemRaw(id){ const v = await storeGet('arsenal:'+id, true); return v ? JSON.parse(v) : null; }
+  async function listArsenal(){
+    const keys = await storeList('arsenal:', true);
+    const out = [];
+    for(const k of keys){ const v = await storeGet(k, true); if(v){ try{ out.push(JSON.parse(v)); }catch(e){} } }
+    return out;
+  }
+  async function deleteArsenalItem(id){ return storeDelete('arsenal:'+id, true); }
+
+  const RANGE_LABEL = {ochbig:'Оч. большая', big:'Большая', mid:'Средняя', low:'Низкая', ochlow:'Оч. низкая'};
+  const COLOR_LABEL = {RED:'Красный', WHITE:'Белый', BLACK:'Чёрный', PALE:'Бледный'};
+
+  function colorMapSummary(map, unit){
+    const parts = Object.keys(map||{}).filter(c=>map[c]).map(c=>COLOR_LABEL[c]+': '+map[c]+(unit||''));
+    return parts.join(' · ') || 'нет данных';
+  }
+
+  function arsenalItemSummary(item){
+    const s = item.stats||{};
+    if(item.type==='weapon'){
+      return 'Ур. '+(s.risk||'ZAYIN')+' · '+(ATK_SPEED_LABEL[s.atkSpeed]||'')+' · дальность: '+(RANGE_LABEL[s.range]||'—')+
+        '<br>Урон: '+(s.dmgVal||0)+' '+(s.dmgType||'RED')+
+        (s.req?('<br>Требования: '+s.req):'');
+    }
+    if(item.type==='armor'){
+      return 'Ур. '+(s.risk||'ZAYIN')+'<br>Сопротивление — '+colorMapSummary(s.res)+
+        (s.req?('<br>Требования: '+s.req):'');
+    }
+    if(item.type==='resonance') return 'ранг '+(s.tier||'ZAYIN');
+    if(item.type==='gift'){
+      const lbls = {courage:'Мужество',wisdom:'Мудрость',endurance:'Выдержка',justice:'Справедливость',hp:'HP напрямую',sp:'SP напрямую'};
+      const parts = Object.keys(lbls).filter(k=>s[k]).map(k=>lbls[k]+': '+(s[k]>0?'+':'')+s[k]);
+      let out = parts.join(' · ') || 'без бонусов характеристик';
+      if(s.slot) out += '<br>Место ношения: '+s.slot;
+      if(s.chance) out += '<br>Шанс получения: '+s.chance+'%';
+      return out;
+    }
+    return '';
+  }
+  function copiesSummary(item){
+    if(item.maxCopies === null || item.maxCopies === undefined) return '';
+    return 'Копий доступно: '+(item.availableCopies||0)+' из '+item.maxCopies;
+  }
+  function equippedBySummary(item){
+    const list = item.equippedBy||[];
+    if(!list.length) return '';
+    return 'Экипировано: '+list.map(e=>e.agentName).join(', ');
+  }
+
+  let arsenalFilterType = 'all';
+  document.querySelectorAll('#arsenalFilter .chip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('#arsenalFilter .chip').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      arsenalFilterType = c.dataset.f;
+      renderArsenalList();
+    });
+  });
+  document.getElementById('arsenalRefresh').addEventListener('click', renderArsenalList);
+
+  async function renderArsenalList(){
+    const all = await listArsenal();
+    const filtered = arsenalFilterType==='all' ? all : all.filter(i=>i.type===arsenalFilterType);
+    const wrap = document.getElementById('arsenalList');
+    if(!filtered.length){ wrap.innerHTML = '<div class="hint">Пусто.</div>'; return; }
+    wrap.innerHTML = filtered.map(item=>{
+      const pending = item.pendingRequests||[];
+      const equipped = item.equippedBy||[];
+      const alreadyMine = currentSession && (pending.some(r=>r.agentId===currentSession.id) || equipped.some(e=>e.agentId===currentSession.id));
+      const outOfStock = (item.maxCopies!==null && item.maxCopies!==undefined) && (item.availableCopies||0) <= 0;
+      const canRequest = currentSession && currentSession.type==='agent' && item.type!=='resonance' && !alreadyMine && !outOfStock;
+      const canDelete = currentSession && (currentSession.type==='sephirah' || currentSession.id===item.sourceAnomalyId);
+      const isSephirah = currentSession && currentSession.type==='sephirah';
+      const copiesTxt = copiesSummary(item);
+      const equippedTxt = equippedBySummary(item);
+      return `<div class="reg-item" style="cursor:default;flex-direction:column;align-items:stretch;">
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;gap:8px;flex-wrap:wrap;">
+          <span><b>${item.name}</b> <span class="reg-badge active" style="margin-left:6px;">${ARSENAL_TYPE_LABEL[item.type]}</span></span>
+          <span class="hint" style="margin:0;">от ${item.sourceAnomalyName||'?'}</span>
+        </div>
+        ${item.desc?`<div class="hint" style="margin:6px 0;">${item.desc}</div>`:''}
+        <div style="font-size:11px;color:var(--amber);margin-top:4px;">${arsenalItemSummary(item)}</div>
+        ${copiesTxt?`<div class="hint" style="margin-top:4px;">${copiesTxt}</div>`:''}
+        ${equippedTxt?`<div class="hint" style="margin-top:2px;">${equippedTxt}</div>`:''}
+        ${isSephirah && pending.length ? `<div class="admin-note" style="margin-top:8px;"><span class="tag">Запросы на экипировку</span>
+          ${pending.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;">
+            <span style="font-size:11px;">${r.agentName}</span>
+            <span style="display:flex;gap:6px;">
+              <button class="runbtn ghost approveReqBtn" data-id="${item.id}" data-agent="${r.agentId}" style="margin-top:0;padding:5px 10px;font-size:9.5px;">Одобрить</button>
+              <button class="runbtn ghost denyReqBtn" data-id="${item.id}" data-agent="${r.agentId}" style="margin-top:0;padding:5px 10px;font-size:9.5px;border-color:var(--red);color:#f2b3ac;">Отклонить</button>
+            </span>
+          </div>`).join('')}
+        </div>` : ''}
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          ${canRequest?`<button class="runbtn ghost reqArsenalBtn" data-id="${item.id}" style="margin-top:0;flex:1;">Запросить экипировку →</button>`:''}
+          ${(currentSession && currentSession.type==='agent' && alreadyMine)?`<div class="hint" style="margin:0;">Уже запрошено/экипировано вами.</div>`:''}
+          ${(currentSession && currentSession.type==='agent' && outOfStock && !alreadyMine)?`<div class="hint" style="margin:0;color:var(--red);">Нет доступных копий.</div>`:''}
+          ${canDelete?`<button class="runbtn ghost delArsenalBtn" data-id="${item.id}" style="margin-top:0;border-color:var(--red);color:#f2b3ac;">Удалить</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('.reqArsenalBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const item = filtered.find(i=>i.id===btn.dataset.id);
+        if(item) await requestEquipArsenalItem(item);
+      });
+    });
+    wrap.querySelectorAll('.approveReqBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        await approveEquipRequest(btn.dataset.id, btn.dataset.agent);
+      });
+    });
+    wrap.querySelectorAll('.denyReqBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        await denyEquipRequest(btn.dataset.id, btn.dataset.agent);
+      });
+    });
+    wrap.querySelectorAll('.delArsenalBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Удалить предмет из Арсенала безвозвратно?')) return;
+        await deleteArsenalItem(btn.dataset.id);
+        logEvent('Предмет удалён из Арсенала.', true);
+        renderArsenalList();
+      });
+    });
+  }
+
+  async function requestEquipArsenalItem(item){
+    const acc = currentSession;
+    item.pendingRequests = item.pendingRequests || [];
+    if(item.pendingRequests.some(r=>r.agentId===acc.id)){ alert('Запрос уже отправлен, ожидайте решения Сефиры.'); return; }
+    item.pendingRequests.push({agentId: acc.id, agentName: acc.name||acc.login, requestedAt: Date.now()});
+    await saveArsenalItem(item);
+    logEvent('Агент «'+(acc.name||acc.login)+'» запросил экипировку «'+item.name+'» ('+ARSENAL_TYPE_LABEL[item.type]+') — ожидает одобрения Сефиры.');
+    alert('Запрос на экипировку «'+item.name+'» отправлен Сефире на одобрение.');
+    renderArsenalList();
+  }
+
+  function applyEquipEffect(acc, item){
+    const s = item.stats||{};
+    if(item.type==='weapon'){
+      acc.weapon = item.name+' [риск '+(s.risk||'ZAYIN')+', '+(ATK_SPEED_LABEL[s.atkSpeed]||'')+', дальность '+(RANGE_LABEL[s.range]||'—')+'] — '+(s.dmgVal||0)+' '+(s.dmgType||'RED');
+    } else if(item.type==='armor'){
+      const resTxt = Object.keys(s.res||{}).filter(c=>s.res[c]).map(c=>COLOR_LABEL[c]+' '+s.res[c]).join(', ') || 'без сопротивлений';
+      acc.armor = item.name+' [риск '+(s.risk||'ZAYIN')+'] — '+resTxt;
+    } else if(item.type==='gift'){
+      acc.gifts = acc.gifts || [];
+      acc.gifts.push({
+        name:item.name, desc:item.desc||'',
+        courage:s.courage||0, wisdom:s.wisdom||0, endurance:s.endurance||0, justice:s.justice||0,
+        hp:s.hp||0, sp:s.sp||0, work:0
+      });
+    }
+  }
+
+  async function approveEquipRequest(itemId, agentId){
+    const item = await getArsenalItemRaw(itemId);
+    if(!item) return;
+    const req = (item.pendingRequests||[]).find(r=>r.agentId===agentId);
+    if(!req) return;
+    const agentAcc = await getAccountRaw(agentId);
+    if(!agentAcc){ alert('Учётная запись агента не найдена.'); return; }
+    if(item.maxCopies!==null && item.maxCopies!==undefined && (item.availableCopies||0)<=0){
+      alert('Нет доступных копий — сначала увеличьте максимальное количество.'); return;
+    }
+    applyEquipEffect(agentAcc, item);
+    await saveAccount(agentAcc);
+    item.pendingRequests = (item.pendingRequests||[]).filter(r=>r.agentId!==agentId);
+    item.equippedBy = item.equippedBy || [];
+    item.equippedBy.push({agentId, agentName: req.agentName, equippedAt: Date.now()});
+    if(item.maxCopies!==null && item.maxCopies!==undefined){ item.availableCopies = Math.max(0, (item.availableCopies||0)-1); }
+    await saveArsenalItem(item);
+    logEvent('Сефира одобрила экипировку «'+item.name+'» для «'+req.agentName+'».');
+    renderArsenalList();
+  }
+
+  async function denyEquipRequest(itemId, agentId){
+    const item = await getArsenalItemRaw(itemId);
+    if(!item) return;
+    const req = (item.pendingRequests||[]).find(r=>r.agentId===agentId);
+    item.pendingRequests = (item.pendingRequests||[]).filter(r=>r.agentId!==agentId);
+    await saveArsenalItem(item);
+    logEvent('Сефира отклонила запрос на экипировку «'+item.name+'»'+(req?(' от «'+req.agentName+'»'):'')+'.', true);
+    renderArsenalList();
+  }
+
+  const RANGE_CATS = [
+    {v:'ochbig', l:'Оч. большая'}, {v:'big', l:'Большая'}, {v:'mid', l:'Средняя'},
+    {v:'low', l:'Низкая'}, {v:'ochlow', l:'Оч. низкая'}
+  ];
+  function colorResUronRow(idPrefix, label){
+    return `
+      <div class="field"><label>${label}</label></div>
+      <div class="stepper-row">
+        <div><div class="stepper" data-color="RED"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label" style="color:var(--red);">Красный</div></div>
+        <div><div class="stepper" data-color="WHITE"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label" style="color:var(--white-dmg);">Белый</div></div>
+        <div><div class="stepper" data-color="BLACK"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label" style="color:var(--black-dmg);">Чёрный</div></div>
+        <div><div class="stepper" data-color="PALE"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label" style="color:var(--pale-dmg);">Бледный</div></div>
+      </div>`;
+  }
+
+  function renderEgoTypeFields(type){
+    const wrap = document.getElementById('an_ego_typeFields');
+    if(!wrap) return;
+    if(type==='weapon'){
+      wrap.innerHTML = `
+        <div class="field"><label>Уровень Э.П.О.С.</label><select id="an_ego_risk">${RISK_LEVELS_SHORT.map(r=>`<option value="${r}">${r}</option>`).join('')}</select></div>
+        <div class="field"><label>Урон по попаданию</label>
+          <div class="row2">
+            <input type="number" id="an_ego_dmgVal" value="0">
+            <div class="dmg-type-row" id="an_ego_dmgTypeRow">
+              <div class="dmg-btn sel" data-t="RED" title="Красный — снижает HP"><svg class="ic"><use href="#ic-red"/></svg></div>
+              <div class="dmg-btn" data-t="WHITE" title="Белый — снижает SP"><svg class="ic"><use href="#ic-white"/></svg></div>
+              <div class="dmg-btn" data-t="BLACK" title="Чёрный — снижает и HP, и SP"><svg class="ic"><use href="#ic-black"/></svg></div>
+              <div class="dmg-btn" data-t="PALE" title="Бледный — снижает HP напрямую"><svg class="ic"><use href="#ic-pale"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="row2" style="margin-top:10px;">
+          <div class="field"><label>Скорость атаки</label>
+            <select id="an_ego_atkSpeed">
+              <option value="ochmed">Оч. Медленная</option><option value="med">Медленная</option>
+              <option value="sred" selected>Средняя</option><option value="vys">Высокая</option><option value="ochvys">Оч. Высокая</option>
+            </select>
+          </div>
+          <div class="field"><label>Дальность атаки</label>
+            <select id="an_ego_range">${RANGE_CATS.map(r=>`<option value="${r.v}">${r.l}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field"><label>Требования (уровень характеристики для экипировки)</label><input type="text" id="an_ego_req" placeholder="напр. Справедливость III"></div>
+        <div class="field"><label>Особые свойства Э.П.О.С.а</label><textarea id="an_ego_special" placeholder="Доп. бонусы, в т.ч. за полный комплект (согласуется с администрацией)"></textarea></div>
+        <div class="field"><label>Максимальное количество копий</label><input type="number" id="an_ego_maxCopies" value="1" min="0"></div>`;
+      wrap.querySelectorAll('#an_ego_dmgTypeRow .dmg-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          wrap.querySelectorAll('#an_ego_dmgTypeRow .dmg-btn').forEach(x=>x.classList.remove('sel'));
+          b.classList.add('sel');
+        });
+      });
+    } else if(type==='armor'){
+      wrap.innerHTML = `
+        <div class="field"><label>Уровень Э.П.О.С.</label><select id="an_ego_risk">${RISK_LEVELS_SHORT.map(r=>`<option value="${r}">${r}</option>`).join('')}</select></div>
+        ${colorResUronRow('res', 'Сопротивление по типам')}
+        <div class="field" style="margin-top:10px;"><label>Требования (уровень характеристики для экипировки)</label><input type="text" id="an_ego_req" placeholder="напр. Выдержка II"></div>
+        <div class="field"><label>Особые свойства Э.П.О.С.а</label><textarea id="an_ego_special" placeholder="Доп. бонусы, в т.ч. за полный комплект (согласуется с администрацией)"></textarea></div>
+        <div class="field"><label>Максимальное количество копий</label><input type="number" id="an_ego_maxCopies" value="1" min="0"></div>`;
+      wrap.querySelectorAll('.stepper').forEach(st=>wireStepper(st));
+    } else if(type==='gift'){
+      wrap.innerHTML = `
+        <div class="row2">
+          <div class="field"><label>Шанс получения, % (1–15, необязательно)</label><input type="number" id="an_ego_chance" min="0" max="15" placeholder="—"></div>
+          <div class="field"><label>Место ношения</label>
+            <select id="an_ego_slot">
+              <option value="Голова 1">Голова 1</option><option value="Голова 2">Голова 2</option>
+              <option value="Лицо">Лицо</option><option value="Глаза">Глаза</option>
+              <option value="Тело">Тело</option><option value="Руки">Руки</option><option value="custom">Другое (указать)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="an_ego_slotCustomWrap" style="display:none;"><label>Уточнение места ношения</label><input type="text" id="an_ego_slotCustom"></div>
+        <div class="hint" style="margin:6px 0 3px;">Бонус к самой характеристике</div>
+        <div class="stepper-row">
+          <div><div class="stepper" data-k="courage"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">Мужество</div></div>
+          <div><div class="stepper" data-k="wisdom"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">Мудрость</div></div>
+          <div><div class="stepper" data-k="endurance"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">Выдержка</div></div>
+          <div><div class="stepper" data-k="justice"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">Справедливость</div></div>
+        </div>
+        <div class="hint" style="margin:8px 0 3px;">Прямой бонус (минуя характеристику)</div>
+        <div class="stepper-row" style="grid-template-columns:repeat(2,1fr);">
+          <div><div class="stepper" data-k="hp"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">HP напрямую</div></div>
+          <div><div class="stepper" data-k="sp"><button class="dn">−</button><input type="number" value="0"><button class="up">+</button></div><div class="stepper-label">SP напрямую</div></div>
+        </div>
+        <div class="field" style="margin-top:10px;"><label>Особые свойства Э.П.О.С. дара</label><textarea id="an_ego_special" placeholder="Доп. бонусы, в т.ч. за полный комплект (согласуется с администрацией)"></textarea></div>`;
+      wrap.querySelectorAll('.stepper').forEach(st=>wireStepper(st));
+      document.getElementById('an_ego_slot').addEventListener('change', (e)=>{
+        document.getElementById('an_ego_slotCustomWrap').style.display = e.target.value==='custom' ? 'block' : 'none';
+      });
+    } else if(type==='resonance'){
+      wrap.innerHTML = `<div class="field"><label>Ранг</label><select id="an_ego_tier"><option value="ZAYIN">ZAYIN</option><option value="TETH">TETH</option><option value="HE">HE</option><option value="WAW">WAW</option></select></div>`;
+    }
+  }
+
+  async function submitEgoItem(acc){
+    const type = document.getElementById('an_ego_type').value;
+    const name = document.getElementById('an_ego_name').value.trim();
+    const desc = document.getElementById('an_ego_desc').value;
+    const msg = document.getElementById('an_ego_msg');
+    msg.classList.remove('show','ok','err');
+    if(!name){ msg.textContent='Укажите название.'; msg.className='auth-msg show err'; return; }
+
+    let stats = {};
+    let maxCopies = null;
+    if(type==='weapon'){
+      const selBtn = document.querySelector('#an_ego_dmgTypeRow .dmg-btn.sel');
+      stats = {
+        risk: document.getElementById('an_ego_risk').value,
+        dmgType: selBtn ? selBtn.dataset.t : 'RED',
+        dmgVal: parseFloat(document.getElementById('an_ego_dmgVal').value)||0,
+        atkSpeed: document.getElementById('an_ego_atkSpeed').value,
+        range: document.getElementById('an_ego_range').value,
+        req: document.getElementById('an_ego_req').value,
+        special: document.getElementById('an_ego_special').value
+      };
+      maxCopies = parseInt(document.getElementById('an_ego_maxCopies').value)||0;
+    } else if(type==='armor'){
+      const res = {};
+      document.querySelectorAll('#an_ego_typeFields [data-color]').forEach(st=>{ res[st.dataset.color] = parseInt(st.querySelector('input').value)||0; });
+      stats = {
+        risk: document.getElementById('an_ego_risk').value,
+        res,
+        req: document.getElementById('an_ego_req').value,
+        special: document.getElementById('an_ego_special').value
+      };
+      maxCopies = parseInt(document.getElementById('an_ego_maxCopies').value)||0;
+    } else if(type==='gift'){
+      const slotSel = document.getElementById('an_ego_slot').value;
+      const slot = slotSel==='custom' ? document.getElementById('an_ego_slotCustom').value : slotSel;
+      stats = { chance: document.getElementById('an_ego_chance').value, slot, special: document.getElementById('an_ego_special').value };
+      document.querySelectorAll('#an_ego_typeFields .stepper').forEach(st=>{ stats[st.dataset.k] = parseInt(st.querySelector('input').value)||0; });
+    } else if(type==='resonance'){
+      stats = { tier: document.getElementById('an_ego_tier').value };
+    }
+
+    const item = {
+      id: 'item_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+      type, name, desc, stats,
+      maxCopies: maxCopies,
+      availableCopies: maxCopies,
+      equippedBy: [],
+      pendingRequests: [],
+      sourceAnomalyId: acc.id, sourceAnomalyName: acc.name||acc.login,
+      createdAt: Date.now()
+    };
+    await saveArsenalItem(item);
+    logEvent('Аномалия «'+(acc.name||acc.id)+'» создала Э.П.О.С.: «'+name+'» ('+ARSENAL_TYPE_LABEL[type]+').');
+    msg.textContent = 'Добавлено в Арсенал.';
+    msg.className = 'auth-msg show ok';
+    document.getElementById('an_ego_name').value = '';
+    document.getElementById('an_ego_desc').value = '';
+    populateMyArsenal(acc);
+    renderArsenalList();
+    beep(520,.08);
+  }
+
+  async function populateMyArsenal(acc){
+    const wrap = document.getElementById('an_myArsenalList');
+    if(!wrap) return;
+    const all = await listArsenal();
+    const mine = all.filter(i=>i.sourceAnomalyId===acc.id);
+    wrap.innerHTML = mine.length ? mine.map(item=>{
+      const copiesTxt = copiesSummary(item);
+      const equippedTxt = equippedBySummary(item);
+      const hasCopies = item.maxCopies!==null && item.maxCopies!==undefined;
+      return `<div class="trait-card"><b>${item.name}</b> <span class="reg-badge active" style="margin-left:6px;">${ARSENAL_TYPE_LABEL[item.type]}</span>
+        ${item.desc?`<div class="hint" style="margin:4px 0;">${item.desc}</div>`:''}
+        <div style="font-size:10.5px;color:var(--amber);">${arsenalItemSummary(item)}</div>
+        ${copiesTxt?`<div class="hint" style="margin-top:4px;">${copiesTxt}</div>`:''}
+        ${equippedTxt?`<div class="hint" style="margin-top:2px;">${equippedTxt}</div>`:''}
+        ${hasCopies?`<div style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+          <input type="number" class="editMaxCopies" data-id="${item.id}" value="${item.maxCopies}" min="0" style="width:70px;">
+          <button class="runbtn ghost saveMaxCopiesBtn" data-id="${item.id}" style="margin-top:0;padding:6px 10px;font-size:9.5px;">Изменить макс. копий →</button>
+        </div>`:''}
+      </div>`;
+    }).join('') : '<div class="hint">Пока ничего не создано.</div>';
+    wrap.querySelectorAll('.saveMaxCopiesBtn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const item = mine.find(i=>i.id===btn.dataset.id);
+        const input = wrap.querySelector('.editMaxCopies[data-id="'+btn.dataset.id+'"]');
+        const newMax = Math.max(0, parseInt(input.value)||0);
+        const delta = newMax - (item.maxCopies||0);
+        item.maxCopies = newMax;
+        item.availableCopies = Math.max(0, Math.min(newMax, (item.availableCopies||0) + delta));
+        await saveArsenalItem(item);
+        logEvent('Аномалия «'+(acc.name||acc.id)+'» изменила макс. количество копий «'+item.name+'» на '+newMax+'.');
+        populateMyArsenal(acc);
+        renderArsenalList();
+      });
+    });
+  }
 
   async function renderRegistry(){
     const all = await listAllAccounts();
@@ -2471,6 +3214,7 @@
       (acc.status==='pending' ? `<button class="runbtn" id="approveBtn">✓ Одобрить анкету</button>` : '') +
       `<button class="runbtn ghost" id="dismissBtn" style="border-color:var(--red);color:#f2b3ac;margin-top:8px;">✕ Уволить (удалить анкету безвозвратно)</button>`;
     document.getElementById('modalBack').classList.add('show');
+    if(acc.type==='anomaly') populateMyArsenal(acc);
     const approveBtn = document.getElementById('approveBtn');
     if(approveBtn){
       approveBtn.addEventListener('click', async ()=>{
