@@ -290,6 +290,9 @@
     color:var(--bone); opacity:0; transition: opacity 1.2s ease; border-bottom:1px solid var(--line-soft); margin-bottom:16px; }
   .phrase-reveal.show{ opacity:1; }
   .desc-hint{ font-size:9.5px; color:#8a8470; margin-top:5px; line-height:1.6; border-left:2px solid var(--line-soft); padding-left:8px; }
+  .bonus-title{ font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .bonus-list{ display:flex; flex-wrap:wrap; gap:6px; }
+  .ally-bonus{ font-size:11px; padding:5px 10px; border:1px solid var(--line-soft); border-radius:3px; background:var(--bg); color:var(--amber); }
 
   /* ===== REGISTRY / LOGS ===== */
   .reg-item{ border:1px solid var(--line-soft); background:var(--panel); border-radius:4px; padding:10px 12px; margin-bottom:8px;
@@ -757,13 +760,8 @@
             <label for="isResonance">Урон от Резонанса (основная атака без бонуса Справедливости/Натиска)</label>
           </div>
 
-          <div class="row2" id="justiceFields">
-            <div class="field"><label>Бонус Справедливости, %</label><input type="number" id="justiceBonus" value="0" step="1"></div>
-            <div class="field"><label>Модификатор Натиска, ×</label><input type="number" id="natiskMod" value="1.0" step="0.05"></div>
-          </div>
-
-          <div class="field">
-            <label>Справочник: модификатор по Справедливости и скорости атаки</label>
+          <div class="field" id="justiceFields">
+            <label>Справедливость по скорости атаки (модификатор применяется последним)</label>
             <div class="row2">
               <select id="justiceTableSpeed">
                 <option value="ochmed">Оч. Медленная</option>
@@ -773,14 +771,25 @@
                 <option value="ochvys">Оч. Высокая</option>
               </select>
               <select id="justiceTableLvl">
-                <option value="1">Справедливость I</option>
-                <option value="2">Справедливость II</option>
-                <option value="3">Справедливость III</option>
-                <option value="4">Справедливость IV</option>
-                <option value="5">Справедливость V</option>
+                <option value="1">Справедл. I</option>
+                <option value="2">Справедл. II</option>
+                <option value="3">Справедл. III</option>
+                <option value="4">Справедл. IV</option>
+                <option value="5">Справедл. V</option>
               </select>
             </div>
             <div class="desc-hint" id="justiceTableOut"></div>
+          </div>
+          <div class="field"><label>Модификатор Натиска, ×</label><input type="number" id="natiskMod" value="1.0" step="0.05"></div>
+
+          <div class="field">
+            <label>Личный доп. урон, % (считается первым)</label>
+            <input type="number" id="personalPct" value="0" step="1">
+          </div>
+          <div class="field">
+            <label>Модификаторы союзников, % (через запятую)</label>
+            <input type="text" id="allyPctList" placeholder="напр. 10, 5, -20">
+            <div class="hint">Отрицательные значения не учитываются (обнуляются).</div>
           </div>
         </div>
       </div>
@@ -792,9 +801,11 @@
           <div class="big-number" id="dmgResult">12.0</div>
           <div class="dial-txt">
             Эфф. атака после Щита: <b id="afterShieldTxt">12.0</b><br>
-            Модификатор риска: <b id="riskModTxt">не применяется</b>
+            Модификатор риска: <b id="riskModTxt">не применяется</b><br>
+            Справедливость (посл.): <b id="justiceModTxt">—</b>
           </div>
         </div>
+        <div id="allyBonusesOut" style="margin-top:10px;"></div>
       </div>
 
       <div class="section-title">Дополнительный урон</div>
@@ -824,7 +835,7 @@
     <!-- ============ TAB: RESONANCE ============ -->
     <section class="panel" id="panel-resonance">
       <div class="section-title">Резонанс Э.П.О.С.</div>
-      <div class="hint" style="margin-bottom:14px;">Урон Резонанса не получает бонус Справедливости и не зависит от Натиска — прочие бонусы всё ещё действуют.</div>
+      <div class="hint" style="margin-bottom:14px;">Урон Резонанса не получает бонус Справедливости и не зависит от Натиска — прочие бонусы всё ещё действуют. Стоимость активации вписывается вручную — под конкретное оружие/дар.</div>
 
       <div class="grid">
         <div>
@@ -832,10 +843,10 @@
             <label>Ранг E.G.O. вооружения</label>
             <select id="resTier">
               <option value="ZAYIN">ZAYIN</option><option value="TETH">TETH</option>
-              <option value="HE" selected>HE</option><option value="WAW">WAW</option>
+              <option value="HE" selected>HE</option><option value="WAW">WAW</option><option value="ALEPH">ALEPH</option>
             </select>
           </div>
-          <div class="field" id="resModeField" style="display:none;">
+          <div class="field">
             <label>Способ активации</label>
             <select id="resMode">
               <option value="instant">Мгновенно (за 1 пост)</option>
@@ -848,6 +859,21 @@
             <div class="field"><label>Уровень сотрудника</label><input type="number" id="empLevel" value="3" min="1" step="1"></div>
             <div class="field"><label>Макс. SP сотрудника</label><input type="number" id="empMaxSp" value="100" step="1"></div>
           </div>
+        </div>
+      </div>
+
+      <div class="field" id="resCostInstantField">
+        <label>Стоимость — мгновенно (SP, мин–макс)</label>
+        <div class="row2">
+          <input type="number" id="resCostInstantMin" value="15">
+          <input type="number" id="resCostInstantMax" value="20">
+        </div>
+      </div>
+      <div class="field" id="resCostSplitField" style="display:none;">
+        <label>Стоимость — растянуто (сразу / на протяжении 3 постов)</label>
+        <div class="row2">
+          <input type="number" id="resCostSplitNow" value="9">
+          <input type="number" id="resCostSplitOver" value="21">
         </div>
       </div>
 
@@ -1006,6 +1032,20 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+  const JUSTICE_DMG_TABLE = {
+    ochmed: {1:'100%', 2:'150%', 3:'200%', 4:'250%', 5:'300%'},
+    med:    {1:'100%', 2:'140%', 3:'190%', 4:'240%', 5:'290%'},
+    sred:   {1:'100%', 2:'180%', 3:'240%', 4:'300%', 5:'320%'},
+    vys:    {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}},
+    ochvys: {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}}
+  };
+  function getJusticePercent(speed, lvl){
+    const entry = JUSTICE_DMG_TABLE[speed][lvl];
+    if(typeof entry === 'string') return parseFloat(entry);
+    const nums = entry.mod.replace(/%/g,'').split('/').map(Number);
+    return nums[nums.length-1];
+  }
+
   /* ============ BOOT SEQUENCE ============ */
   /* ============ SPLASH ============ */
   const splashEl = document.getElementById('splashScreen');
@@ -1186,6 +1226,7 @@
   });
   document.getElementById('isResonance').addEventListener('change', (e)=>{
     document.getElementById('justiceFields').style.opacity = e.target.checked ? '.4' : '1';
+    document.getElementById('natiskMod').parentElement.style.opacity = e.target.checked ? '.4' : '1';
     calcDamage();
   });
 
@@ -1211,16 +1252,29 @@
   document.getElementById('extraDmgAdd').addEventListener('click', addExtraDmgRow);
   addExtraDmgRow();
 
+  function parseMultipliers(str){
+    return (str||'').split(/[,;\n]+/).map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n));
+  }
+
   function calcDamage(){
     const raw = parseFloat(document.getElementById('dmgRaw').value)||0;
     const shield = parseFloat(document.getElementById('shield').value)||0;
     const resist = parseFloat(document.getElementById('resist').value)||0;
     const useRisk = document.getElementById('useRiskMod').checked;
     const isRes = document.getElementById('isResonance').checked;
-    const justiceBonus = parseFloat(document.getElementById('justiceBonus').value)||0;
     const natisk = parseFloat(document.getElementById('natiskMod').value)||1;
+    const personalPct = parseFloat(document.getElementById('personalPct').value)||0;
+    const allyListRaw = parseMultipliers(document.getElementById('allyPctList').value);
+    const allyListClamped = allyListRaw.map(n=>Math.max(0,n));
+    const allySum = allyListClamped.reduce((a,b)=>a+b,0);
 
+    // 1) личный доп. урон — считается первым
     const afterShield = Math.max(raw - shield, 0);
+    const personalMult = 1 + personalPct/100;
+    const allyMult = 1 + allySum/100;
+    const afterBonuses = afterShield * personalMult * allyMult;
+
+    // 2) модификатор уровня риска
     let mod = 1, modTxt = 'не применяется';
     if(useRisk){
       const rTarget = parseInt(document.getElementById('riskTarget').value);
@@ -1229,16 +1283,41 @@
       mod = riskMod(diff);
       modTxt = Math.round(mod*100)+'% (diff '+diff+')';
     }
+    const afterRisk = afterBonuses * mod;
 
-    let dmg = afterShield * mod * resist;
-    const extraJusticeMult = (1 + justiceBonus/100) * natisk;
-    let justiceMult = 1;
-    if(!isRes){ justiceMult = extraJusticeMult; dmg *= justiceMult; }
+    // 3) сопротивление
+    const afterResist = afterRisk * resist;
+
+    // 4) Справедливость (по скорости атаки) + Натиск — считаются строго последними
+    const speed = document.getElementById('justiceTableSpeed').value;
+    const lvl = parseInt(document.getElementById('justiceTableLvl').value);
+    const justicePercent = getJusticePercent(speed, lvl);
+    const justiceMult = justicePercent/100;
+    const extraJusticeMult = justiceMult * natisk;
+    let finalMult = 1, justiceTxt = 'не применяется (Резонанс)';
+    if(!isRes){ finalMult = extraJusticeMult; justiceTxt = justicePercent+'% × Натиск '+natisk.toFixed(2); }
+
+    const dmg = afterResist * finalMult;
 
     document.getElementById('afterShieldTxt').textContent = afterShield.toFixed(2);
     document.getElementById('riskModTxt').textContent = modTxt;
-    document.getElementById('dmgBadge').textContent = '×'+(resist*justiceMult).toFixed(2);
+    document.getElementById('justiceModTxt').textContent = justiceTxt;
+    document.getElementById('dmgBadge').textContent = '×'+(resist*finalMult).toFixed(2);
     document.getElementById('dmgResult').textContent = dmg.toFixed(2);
+
+    const allyOut = document.getElementById('allyBonusesOut');
+    if(allyListRaw.length){
+      const chips = allyListRaw.map(p=>{
+        const clamped = Math.max(0,p);
+        const contribution = afterShield * personalMult * (clamped/100) * mod * resist * finalMult;
+        const sign = contribution>=0 ? '+' : '';
+        const excluded = p<0 ? ' (не учтён)' : '';
+        return `<span class="ally-bonus">${p}%${excluded} = ${sign}${contribution.toFixed(2)}</span>`;
+      }).join('');
+      allyOut.innerHTML = '<div class="bonus-title">Бонусы от союзников:</div><div class="bonus-list">'+chips+'</div>';
+    } else {
+      allyOut.innerHTML = '';
+    }
 
     let mainForSum = dmg;
     document.getElementById('sumMain').textContent = mainForSum.toFixed(2);
@@ -1261,8 +1340,8 @@
     lastDmgSummary = {main: mainForSum, extra: extraOut, terr: terrOut, type: currentDmgType};
   }
 
-  ['dmgRaw','shield','riskTarget','riskWeapon','resist','justiceBonus','natiskMod',
-   'terrPerPost','terrPosts'].forEach(id=>{
+  ['dmgRaw','shield','riskTarget','riskWeapon','resist','natiskMod','personalPct','allyPctList',
+   'justiceTableSpeed','justiceTableLvl','terrPerPost','terrPosts'].forEach(id=>{
     document.getElementById(id).addEventListener('input', calcDamage);
     document.getElementById(id).addEventListener('change', calcDamage);
   });
@@ -1282,44 +1361,44 @@
   });
 
   /* ============ RESONANCE TAB ============ */
-  const resConfig = {
-    ZAYIN: { minLevel: null, instant:[10,15] },
-    TETH:  { minLevel: 2, instant:[15,20] },
-    HE:    { minLevel: 3, instant:[20,25], split:[9,21] },
-    WAW:   { minLevel: 4, instant:[30,35], split:[10,30] }
-  };
+  const resLevelReq = { ZAYIN: null, TETH: 2, HE: 3, WAW: 4, ALEPH: 5 };
   let lastRes = {};
   document.getElementById('resTier').addEventListener('change', calcResonance);
   document.getElementById('resMode').addEventListener('change', calcResonance);
-  ['empLevel','empMaxSp'].forEach(id=>document.getElementById(id).addEventListener('input', calcResonance));
+  ['empLevel','empMaxSp','resCostInstantMin','resCostInstantMax','resCostSplitNow','resCostSplitOver'].forEach(id=>
+    document.getElementById(id).addEventListener('input', calcResonance));
 
   function calcResonance(){
     const tier = document.getElementById('resTier').value;
-    const cfg = resConfig[tier];
-    const hasSplit = !!cfg.split;
-    document.getElementById('resModeField').style.display = hasSplit ? 'block' : 'none';
+    const minLevel = resLevelReq[tier];
     const mode = document.getElementById('resMode').value;
+    document.getElementById('resCostInstantField').style.display = mode==='instant' ? 'block' : 'none';
+    document.getElementById('resCostSplitField').style.display = mode==='split' ? 'block' : 'none';
     const level = parseInt(document.getElementById('empLevel').value)||0;
     const maxSp = parseFloat(document.getElementById('empMaxSp').value)||0;
 
-    if(cfg.minLevel && level < cfg.minLevel){
+    if(minLevel && level < minLevel){
       const cost = maxSp*0.75;
       document.getElementById('resResult').textContent = cost.toFixed(1)+' SP';
       document.getElementById('resBadge').textContent = '75% от макс. SP';
       document.getElementById('resNote').innerHTML =
-        'Уровень сотрудника ('+level+') ниже требуемого для '+tier+' (нужен ≥ '+cfg.minLevel+'). Списывается 75% от максимума SP.';
+        'Уровень сотрудника ('+level+') ниже требуемого для '+tier+' (нужен ≥ '+minLevel+'). Списывается 75% от максимума SP.';
       lastRes = {tier, text: cost.toFixed(1)+' SP (75% макс., уровень ниже требуемого)'};
       return;
     }
-    document.getElementById('resBadge').textContent = 'обычная стоимость';
-    if(hasSplit && mode==='split'){
-      document.getElementById('resResult').textContent = cfg.split[0]+' + '+cfg.split[1]+' SP';
-      document.getElementById('resNote').innerHTML = cfg.split[0]+' SP сразу, ещё '+cfg.split[1]+' SP — на протяжении следующих 3 постов.';
-      lastRes = {tier, text: cfg.split[0]+'+'+cfg.split[1]+' SP (растянуто на 3 поста)'};
+    document.getElementById('resBadge').textContent = 'вручную заданная стоимость';
+    if(mode==='split'){
+      const now = parseFloat(document.getElementById('resCostSplitNow').value)||0;
+      const over = parseFloat(document.getElementById('resCostSplitOver').value)||0;
+      document.getElementById('resResult').textContent = now+' + '+over+' SP';
+      document.getElementById('resNote').innerHTML = now+' SP сразу, ещё '+over+' SP — на протяжении следующих 3 постов.';
+      lastRes = {tier, text: now+'+'+over+' SP (растянуто на 3 поста)'};
     } else {
-      document.getElementById('resResult').textContent = cfg.instant[0]+' – '+cfg.instant[1]+' SP';
+      const min = parseFloat(document.getElementById('resCostInstantMin').value)||0;
+      const max = parseFloat(document.getElementById('resCostInstantMax').value)||0;
+      document.getElementById('resResult').textContent = min+' – '+max+' SP';
       document.getElementById('resNote').innerHTML = 'Списывается единовременно при активации Резонанса.';
-      lastRes = {tier, text: cfg.instant[0]+'–'+cfg.instant[1]+' SP (мгновенно)'};
+      lastRes = {tier, text: min+'–'+max+' SP (мгновенно)'};
     }
   }
   document.getElementById('logResBtn').addEventListener('click', ()=>{
@@ -1363,7 +1442,7 @@
         </div>
         <div class="field-inline">
           <label>Кол-во Агро (вручную)</label>
-          <input type="number" class="agroCount" min="0" step="1" value="0">
+          <input type="number" class="agroCount" step="1" value="0">
         </div>
       </div>`;
     document.getElementById('agroRows').appendChild(wrap);
@@ -1393,7 +1472,7 @@
       const name = r.querySelector('.agroName').value || 'Агент';
       const sel = r.querySelector('.agroRange').value;
       const base = sel==='custom' ? Math.max(1, parseFloat(r.querySelector('.agroCustom').value)||1) : rangeWeights[parseInt(sel)].w;
-      const manual = Math.max(0, parseFloat(r.querySelector('.agroCount').value)||0);
+      const manual = parseFloat(r.querySelector('.agroCount').value)||0;
       const weight = Math.max(1, base + manual);
       return {name, weight, base, manual};
     });
@@ -1603,27 +1682,6 @@
       ' ('+signed(info.dept)+' \\ '+signed(info.gifts)+' \\ '+signed(info.traits)+')';
   }
 
-  const JUSTICE_DMG_TABLE = {
-    ochmed: {1:'100%', 2:'150%', 3:'200%', 4:'250%', 5:'300%'},
-    med:    {1:'100%', 2:'140%', 3:'190%', 4:'240%', 5:'290%'},
-    sred:   {1:'100%', 2:'180%', 3:'240%', 4:'300%', 5:'320%'},
-    vys:    {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}},
-    ochvys: {1:{extra:0,mod:'70/80/90/100%'}, 2:{extra:1,mod:'70/80/90/100%'}, 3:{extra:2,mod:'70/80/90/100%'}, 4:{extra:3,mod:'70/80/90/100%'}, 5:{extra:3,mod:'80/90/100%'}}
-  };
-  function updateJusticeTableOut(){
-    const speed = document.getElementById('justiceTableSpeed').value;
-    const lvl = parseInt(document.getElementById('justiceTableLvl').value);
-    const entry = JUSTICE_DMG_TABLE[speed][lvl];
-    const out = document.getElementById('justiceTableOut');
-    if(typeof entry === 'string'){
-      out.textContent = 'Модификатор урона: '+entry+' (применяется в последнюю очередь ко всему урону хода).';
-    } else {
-      out.textContent = 'Доп. атаки: '+entry.extra+' · Модификатор по каждой атаке (по порядку): '+entry.mod+' — применяйте вручную к каждой атаке отдельно, не как единый множитель.';
-    }
-  }
-  document.getElementById('justiceTableSpeed').addEventListener('change', updateJusticeTableOut);
-  document.getElementById('justiceTableLvl').addEventListener('change', updateJusticeTableOut);
-  updateJusticeTableOut();
 
   // Wires a stat-value block (4 inputs .statInput) to live-compute per-stat level, total agent level, and sync Speed = Justice.
   function wireStatBlock(containerId, levelOutId, speedInputId){
